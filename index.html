@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Larval Transport Connectivity Viewer — Billion Oyster Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#10262b; --ink-2:#17343a; --paper:#eaeeeb; --panel:#ffffff;
+  --line:#ccd6d1; --line-strong:#aebdb7; --muted:#5c6f6b; --text:#152a2e;
+  --tide:#2f9c8b; --tide-deep:#1c6a5e; --tide-wash:#e2efec;
+  --warn:#8a5a24; --warn-wash:#f3e9db;
+  --radius:10px; --gap:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper); color:var(--text);
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; line-height:1.45;
+}
+.wrap{max-width:1400px;margin:0 auto;padding:26px 22px 60px}
+
+/* Header */
+header.masthead{
+  border-bottom:1.5px solid var(--ink);
+  padding-bottom:16px;margin-bottom:22px;
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 28px;
+}
+.title-block{flex:1 1 340px;min-width:280px}
+.eyebrow{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--tide-deep);font-weight:600;margin:0 0 6px;
+}
+h1{
+  font-size:clamp(22px,3.2vw,32px);line-height:1.05;margin:0;
+  font-weight:600;letter-spacing:-.01em;color:var(--ink);
+}
+.sub{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:60ch}
+.modeswitch{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;align-self:flex-end}
+.modeswitch button{
+  font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.02em;
+  background:transparent;color:var(--ink);border:0;padding:9px 16px;cursor:pointer;
+}
+.modeswitch button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.modeswitch button:focus-visible{outline:2px solid var(--tide);outline-offset:2px}
+
+/* Panels grid */
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);align-items:start}
+.stage.single{grid-template-columns:1fr;max-width:920px;margin:0 auto}
+.stage.single .panel[data-panel="B"]{display:none}
+
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 1px 0 rgba(16,38,43,.03);
+}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 14px;background:var(--ink);color:#eaf3f0;
+}
+.panel-tag{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--tide);box-shadow:0 0 0 3px rgba(47,156,139,.25)}
+.panel[data-panel="B"] .dot{background:#e0a13c;box-shadow:0 0 0 3px rgba(224,161,60,.22)}
+.match-btn{
+  font-family:inherit;font-size:11.5px;font-weight:500;color:#bfe0d8;
+  background:transparent;border:1px solid rgba(191,224,216,.4);border-radius:6px;
+  padding:4px 9px;cursor:pointer;white-space:nowrap;
+}
+.match-btn:hover{background:rgba(191,224,216,.12);color:#fff}
+.match-btn:focus-visible{outline:2px solid var(--tide);outline-offset:1px}
+
+/* Controls */
+.controls{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:11px 12px;padding:14px;border-bottom:1px solid var(--line);
+}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.span{grid-column:1 / -1}
+label.lab{
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;
+}
+select{
+  font-family:inherit;font-size:13.5px;color:var(--text);font-weight:500;
+  background:#fbfcfb;border:1px solid var(--line-strong);border-radius:7px;
+  padding:8px 30px 8px 10px;cursor:pointer;appearance:none;width:100%;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%235c6f6b' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+select:focus-visible{outline:2px solid var(--tide);outline-offset:1px;border-color:var(--tide)}
+
+/* LIS segmented toggle */
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden}
+.seg button{
+  flex:1;font-family:inherit;font-size:12.5px;font-weight:500;
+  background:#fbfcfb;color:var(--muted);border:0;padding:8px 6px;cursor:pointer;
+}
+.seg button[aria-pressed="true"]{background:var(--tide-wash);color:var(--tide-deep);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--tide);outline-offset:-2px}
+.seg button + button{border-left:1px solid var(--line-strong)}
+
+/* Flow chip inline with year */
+.flowchip{font-size:11px;font-weight:600;color:var(--muted)}
+.flowchip b{color:var(--tide-deep);font-weight:600}
+
+/* Token readout — the signature */
+.readout{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;
+  padding:10px 14px;background:var(--ink-2);color:#cfe0db;
+  word-break:break-all;border-bottom:1px solid var(--line);
+}
+.readout .t-var{color:#8fe0d0;font-weight:600}
+.readout .t-dim{color:#7f9b95}
+.readout .muted{color:#7d938e}
+
+/* Preview */
+.preview{position:relative;background:#f4f6f5;aspect-ratio:11/8.5;width:100%}
+.preview iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.preview.empty iframe{display:none}
+.na{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;text-align:center;
+  padding:30px;background:repeating-linear-gradient(45deg,#f4f6f5,#f4f6f5 12px,#eef1ef 12px,#eef1ef 24px);
+}
+.preview.empty .na{display:flex}
+.na .na-icon{font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--warn);font-weight:600}
+.na h3{margin:0;font-size:15px;color:var(--ink)}
+.na p{margin:0;font-size:12.5px;color:var(--muted);max-width:34ch}
+
+/* Panel foot */
+.panel-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;font-size:12px;color:var(--muted);
+}
+.drive-link{
+  color:var(--tide-deep);text-decoration:none;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.drive-link[aria-disabled="true"]{color:var(--line-strong);pointer-events:none}
+.drive-link:hover{text-decoration:underline}
+
+/* Notes */
+.notes{
+  margin-top:26px;border-top:1px solid var(--line);padding-top:16px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 26px;
+}
+.note h4{margin:0 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.note p{margin:0;font-size:12.5px;color:var(--muted)}
+.note code{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#e0e6e3;padding:1px 5px;border-radius:4px;color:var(--ink-2)}
+.gap-flag{color:var(--warn);font-weight:600}
+
+@media (max-width:860px){
+  .stage{grid-template-columns:1fr}
+  .stage.single{max-width:none}
+  .modeswitch{align-self:flex-start}
+}
+@media (prefers-reduced-motion:no-preference){
+  .preview iframe{transition:opacity .18s ease}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="title-block">
+      <p class="eyebrow">Billion Oyster Project · Larval Transport Modelling</p>
+      <h1>Connectivity Plot Viewer</h1>
+      <p class="sub">Two independent panels. Set each to any run count, flow year, connectivity threshold, output metric, and Long Island Sound scenario — then read them side by side.</p>
+    </div>
+    <div class="modeswitch" role="group" aria-label="Layout">
+      <button id="mode-compare" aria-pressed="true">Compare · 2 panels</button>
+      <button id="mode-single" aria-pressed="false">Single · 1 panel</button>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <!-- panels injected -->
+  </div>
+
+  <section class="notes">
+    <div class="note">
+      <h4>Reading the code</h4>
+      <p>The mono line under each panel is the exact source filename. Highlighted tokens are the ones you control.</p>
+    </div>
+    <div class="note">
+      <h4>Flow years</h4>
+      <p><b>1993</b> moderate · <b>1995</b> low · <b>1996</b> high freshwater flow.</p>
+    </div>
+    <div class="note">
+      <h4>Output metrics</h4>
+      <p>Connectivity strength, eigenvalue centrality, weighted in-degree — computed on the same run set.</p>
+    </div>
+    <div class="note">
+      <h4>Coverage gap</h4>
+      <p><span class="gap-flag">18 combinations don't exist yet:</span> the 5-run set at the 25th / 50th / 75th percentile, LIS <em>included</em>, for 1995 and 1996. Selecting one shows an "unavailable" panel.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+const MANIFEST = {"30|1993|95|conn|no":"1CffYOa_3H7JIjotYEZpvw1rzram4vE9Q","5|1993|25|eig|no":"1PmkTV0g-_w8XEPz0bmZ3EzZXVwoxNDgC","5|1993|95|wid|no":"1FjAGdxjKBi0GqUyB-u0s4-Zztzl2y3Wa","5|1993|95|conn|no":"182-_gcnSUdgQ8f9THnqDpIm-Dssd67xJ","5|1993|75|wid|no":"1LeBFEzDNq302Zf6_SOXtolgBJ4lf5zYK","5|1993|80|wid|no":"1YzLmMKTaqDhmgCMa5GdH7Bo4HwTquHBW","5|1993|75|conn|no":"1PgHAbGS68mULlyojhGVCJYHExOvngrzi","5|1993|50|eig|no":"19LkKeS5QzYLIrrUupd55aVUY4-gekomo","5|1993|50|conn|no":"1n4bwhcmZejboZdFCA8_o22ZRaGMorxKl","5|1993|50|wid|no":"1WEPVLlcE3ekqPoAeDpKdxrZ8aH5lhgrN","5|1993|80|conn|no":"1FyO0m7pT1lDJjwNsWtN6mHU8f0hGH5PA","5|1993|90|conn|no":"1ONPwt0WVYKzCiUR8vUu1n9_XkP4oqGkY","5|1993|85|conn|no":"1kTVtPIW7XbMN_sXYYt0FTurthX8T1v_9","5|1993|85|eig|no":"14zryYuC-9Ia9Rem_xxcj8EOjah2FcReX","5|1993|90|wid|no":"1_ZVJmfsqzJzPcMaet6gEOy2lrdMFlTMB","5|1993|80|eig|no":"1bV0IeyForlPcppcUPE-cGTLeEIjaDMym","5|1993|90|eig|no":"15W5jjEGHSaD_3Ga7N0ZFlkSh-wOvt5l2","5|1993|85|wid|no":"18VjJ4ZwW8n_6phue_1DYRD20d-FY80KR","5|1993|95|eig|no":"1O2vwZckmEZ5poaCBJ_1uBYeKUeOwdwDc","5|1993|75|eig|no":"1M1I3pTzw4km5gopwUD1cQjfd_ijhe1os","5|1993|25|wid|no":"19mAltGZefyiA99xjOrmN1kqNcmfFibnX","5|1993|25|conn|no":"1XGNZALKzAiI6RYr7SoHGDZfY-OKaYuSP","30|1993|90|eig|no":"17CN0Non429qr0ozOtP0H-biYRP6vTqVa","30|1993|90|wid|no":"1n1r2c11Hfldx_Tk4mAolDiL49tar75KX","30|1993|90|conn|no":"1MXTMD-87PUpwJybbzf0y235pxYm5BuAA","30|1993|75|wid|no":"1XqL5GkY8Nvxbn3E1ekdtql-WgdXo5QtO","30|1993|80|eig|no":"1MqM-Q9Yl6f-KP3_idDInVtlf6zdW6F38","30|1993|80|conn|no":"1nSL7L_r5fUSAT21pogCuewkt2AVc45IZ","30|1993|80|wid|no":"12YdoBeDAVOjVaxEW1RZPz45HfP_7jmCw","30|1993|85|wid|no":"1XPrYtbmnJhCCHY3FyEX7gxp7mNiO5o5h","30|1993|85|conn|no":"1Vt0dq9-tjtsu8xeLEBfPyAjmw-g1cmqi","30|1993|95|eig|no":"1Fc3upA1b8AOaDaVckrUqY4EcHWLL1Kkx","30|1993|85|eig|no":"1Cdt1n8jwgf_3cJvDYyZoS970TE2dwIro","30|1993|95|wid|no":"17N9psbMENdPxBDLzbKmtaEndsZChPlHh","30|1993|25|conn|no":"1yXRgVHn20B0nX4lBkuKA3Kfz0GOOZ3zA","30|1993|50|wid|no":"1Gx7B_pBqgXDHGbfLN_UublNjVylV8gGm","30|1993|25|eig|no":"15hT69FJPRJXER7H2go73i-Wh03x0hl2e","30|1993|25|wid|no":"137oK__DSqBSM2TrNkgTDij6t4LCmoX_n","30|1993|50|eig|no":"1G6h-4lKyLHf0IIieOxAVqyHJwH09QnzF","30|1993|50|conn|no":"1ee0fNdHy8DzTsgyI9yNwD8SuY_XztL0N","30|1993|75|conn|no":"1s_ATYjnVuY_q769mNFplUf9TsBFE0it8","30|1993|75|eig|no":"1PiQysukdvCSJa_VvIjMmGk6pr7ZucqLD","5|1993|85|wid|with":"101CsTiR63ZS-Iw-2KGnUkqiN8iK8eKsO","5|1993|85|eig|with":"1n80cbil5sXoU6YJJsQOsfM7yJYLgfL2I","5|1993|80|eig|with":"1IImNwNs9M3JEQghW_hCOfYDke2HKICYX","5|1993|90|wid|with":"1RMPOZQh047mmLjdyPEaVIANAoDxdJysE","5|1993|80|conn|with":"1J_T4d42rhq4QiD3cs8Dxr0pkjm49GMVX","5|1993|95|eig|with":"1bOh63om_SrlBrcs9G_8ox0yy-AmEzqvL","5|1993|90|eig|with":"1gLPspz7yKRUKTyakwA5w-JmFreADvsF2","5|1993|95|conn|with":"1o8ebVQZwXBsDKM0A5B8od5yuooIwisit","5|1993|95|wid|with":"1aujp6btAPdGrxPRP0pltPWJR0SDBmq3K","5|1993|80|wid|with":"1H2qWVQVBvadsZ66H2t4G3gkOgP3IQdqv","5|1993|90|conn|with":"1ExYCS_qmz1sqHcNC3-SBIvzQs83gnmel","5|1993|75|eig|with":"1kKhKps997Ff2OhueY_SkDKb5QKm8HtTH","5|1993|85|conn|with":"1cBb2I8cw_FpAWF6vF0nkvc7ceHsdpoQS","5|1993|75|wid|with":"1BnvLTsGBvCzdgH-vDqKl9rO86kTak2ls","5|1993|50|eig|with":"1LK9sakAOzerORzmJgBsR-rvwEsD0ytoN","5|1993|25|eig|with":"1rGu1GFEu1T7YR19EfEgjD3u7KOMFtVrr","5|1993|25|conn|with":"1Z9wks1_AOw1jcV-sBFgEe_FGzwZTiNN6","5|1993|75|conn|with":"1QaUV5nDWO_NNuE84CIi2mpo0XOyWo0NB","5|1993|25|wid|with":"1l2QvSdStt35SsXSQImcaL4T72bf8vu1D","5|1993|50|conn|with":"1OgMnhKEH3Va-s_xYybiVfxHJX1WCGHAZ","30|1993|90|wid|with":"1cU_XRYyhFfIzeXBLc92JXPo7EBWdE-cD","30|1993|95|wid|with":"1L34nq2VgYtnfKvS4HU2JonSrZBdQ2vFA","5|1993|50|wid|with":"1-y-iIlK6fmaTajT4Tv2QhcdVHJCTglDq","30|1993|95|eig|with":"1UtR_JqXbzpF__7i2AQdqw7XJA59e5sBR","30|1993|90|eig|with":"1NMLDztdAsl_79cGwr7gwaob_6BCBvhGA","30|1993|85|wid|with":"1RHQDsY-bUP9VnKEQcwPCMSe5r1bqgD38","30|1993|85|eig|with":"1XmkO3KVXxD8PH1wi6M6yfJNz1w3Ii9Vn","30|1993|90|conn|with":"124IqDlDKTMf_Me2FruNg0U30dkfUB_M8","30|1993|85|conn|with":"1YKX5Yw-BUsntPFSeCD-3x9AdxR0BzbMQ","30|1993|95|conn|with":"1Xcbt2DhNRuyiwSCulnQhYgro124rC9Q0","30|1993|25|eig|with":"1S0UVDn9FOF_lW-XU9chiGXvoXU0yXXrB","30|1993|25|wid|with":"1-uOnZEmeAiji7KQBcolqCkx5fF87zeXA","30|1993|50|eig|with":"1vgAKD-Uz_1uM95Mr55MbFjwWXiT_2owL","30|1993|50|wid|with":"1WWzhGty-Gpm3KXzl5Is-HhmoWpdU8P_P","30|1993|50|conn|with":"1WshVbY0JXGEiqiHX61-774FF5gEepatR","30|1993|25|conn|with":"1NqSLbsHMLMLYZkCcFVEB4iIkTCQH4Kwd","30|1993|80|conn|with":"11rxz4uu_B_2TIWDbq3FxqvCsXxexqDb1","30|1993|75|eig|with":"1YEKTjTlxYDIcshcWu3TwX053E4U60fq7","30|1993|75|conn|with":"1uEXTbTBWEQ0szS5Db2OfuZAwprrI6aNk","30|1993|80|eig|with":"1PIOmR-wVQxdQXtPIIb9GcCORjyG7BKXZ","30|1993|75|wid|with":"1P-EcaylJKf_9zGyl7IZKKSDpKzgD2rD0","30|1993|80|wid|with":"1ZVj2iN_buD8t7kwmDqPMblEnXJPJKsWF","5|1995|95|wid|no":"1QY9KnKqJlfRb9kmprT9S9aKlYQJN7u9C","5|1995|85|conn|no":"1nGcwXvzPf9fyn8hHlRgFull-96M5OtaE","5|1995|80|wid|no":"11In2TIVbIr4RubgzW5IZyEKAkVf2ix87","5|1995|90|conn|no":"1vjlbsqnmJDPNs0F-MxwLrc1g0trZ58Cv","5|1995|95|conn|no":"1ATBK8GCCL8iUZbMSuJR2s2cOBcIHujry","5|1995|85|wid|no":"1sy3uvVCXwuwaY6NwIdnnlO9rzGqieLKI","5|1995|90|wid|no":"1HnyhstGSDcV7OMDJoMpF_xdbncJG3Lhx","5|1995|85|eig|no":"1r0hJDthM4rd8Y1MEquWqcoKN3RCqorUJ","5|1995|95|eig|no":"1_hRFni2xP7mfwWRhedmuerdKGyNPqY-q","5|1995|90|eig|no":"1LtYbxfhDtPDets0dOVYr_zf7kmdedhnP","5|1995|25|wid|no":"1lQ7ShFbgzLRFHQIhRg5qiOGwxlwr4E26","5|1995|50|eig|no":"1Wyd1rMW3cMar_Xx2rVDdwOOergM6xFtb","5|1995|25|conn|no":"1gD-NDmpp24SX5dcuVJeU9D91GFbosPqy","5|1995|50|wid|no":"1IP5D_oougclwvL2gV9gpJ4egoXA4bnXn","5|1995|80|eig|no":"1mxIa5cst-TPMfPIv7mGiJ1x6drlGmhn-","5|1995|25|eig|no":"1fao99Lc4KriUA9sZFBfkC2FE2HbOBDz3","5|1995|75|wid|no":"1c6Bmt2GirGjId5MwI1ze7EKOJw3419l8","5|1995|75|eig|no":"1PBEIy0Hl2ipePrFMv01691N3tVdrNbuM","5|1995|75|conn|no":"1G6jQ-kyOWabjXhF2Uh8Jh15h1tZS0Opz","5|1995|50|conn|no":"1EwjCY0hCelXNgA3wIYXIxwUlR1KCVoYU","30|1995|90|wid|no":"1wHqnCJuhS9eO81FuvSAaJQ21LMGOQQOo","5|1995|80|conn|no":"1HBIXC6frBSBY3DgUS8v3PjrRdA4mZoRI","30|1995|90|conn|no":"1e-wu0gC1GOqw71CIZvPRLX0227uFdvF0","30|1995|95|conn|no":"1zyXy50l6rrmtoQCTKshjInuP8cZ050mw","30|1995|95|eig|no":"19kjq-HC-Gs1hSrAYC9oOHCRMfXyZ_969","30|1995|95|wid|no":"1nzj3VXLEVQITlWhSst9frDt3mpKJQbdR","30|1995|50|conn|no":"1UVetNUs_d5J5fLcOdXbyZf5DlAJmU3hx","30|1995|50|eig|no":"1q3K53gwvbrdupTBBRbg42hLI8cSRGVtU","30|1995|75|conn|no":"1fg5JShzCicFzpB1aB_vPjYn4mJQUjQgL","30|1995|25|eig|no":"1qMgMrMY89ItB5zKkkkAf6NuMlgfrn2KD","30|1995|85|wid|no":"1fj74o0V9IlKHZkhEmON1P-i8oE112xCT","30|1995|85|eig|no":"159OR4OWEEaC3smvlacOGRCP0ROtbt2NJ","30|1995|25|conn|no":"1keY-EdxC3iyRMLFuKONXJuY-htCRrN9j","30|1995|25|wid|no":"1JTQGyD5h1XMwBH7lzMqw8FhWdg-suy6u","30|1995|75|wid|no":"1FbZzW0DsJafu9rQMQqiws_tFF4k7qTTu","30|1995|50|wid|no":"1OKEXwr54HxQieisq7Oma8FSG6inzGb5A","30|1995|80|wid|no":"1JYz6OAkvY-iL0J3GNTVSUvzWfU7eQ642","30|1995|80|eig|no":"1tYaE5Xd1ZhDIM7BLcRq0hl8LQlMiAQ_Z","30|1995|75|eig|no":"117ZWKspdbSBfp7IiKlmE6W9-0XPRJ7k7","30|1995|85|conn|no":"1wdxXID7drR0DypVXdaaUlCaM0fny31Ny","30|1995|80|conn|no":"15sQCMsTSu9plo63ZowK_JdI2kkrmEAT-","30|1995|90|eig|no":"1M1IH67GPXd586O1r5-QfuFcIkKk0QZFB","5|1995|85|conn|with":"1QEuoa_IfqtRDQK31gTdCwUd_AW9sPQT2","5|1995|85|wid|with":"1IXp6BugCgeUWOmiBTJ_Qvy2Cr8womh2a","5|1995|95|wid|with":"1jHoOykzRTjADrVRvhw4C2BI5853sYcUd","5|1995|80|wid|with":"1h0P3QzmWG3A8ELIwk29ubk2rnN9ALeiY","5|1995|90|wid|with":"1M04OHSvXk2D6OW8ALVGeIok7UqS9rABE","5|1995|90|conn|with":"152RoRVa484qnOk6xxtqFSUddo8Yhbb3e","5|1995|85|eig|with":"1JfPZnV6DkjSHPSKswmN-nRfddEju1bEI","5|1995|95|eig|with":"1aDzfLSkh4TOW68-Mx_WxIA83yItWk6Au","5|1995|90|eig|with":"1gT9Rvsk48DRbOQXgF4WSOV9N5sNDrvfB","5|1995|95|conn|with":"1huS4oKIGarsWIUNEQfWlg5LhshsQ2KN3","5|1995|80|eig|with":"15vGylK1cPWu1RpYgn8Mp3NEXuK_ILYaz","5|1995|80|conn|with":"1t_Aoo7xgl0Y-fwR6geU9WcoRNEmacSLt","30|1995|90|eig|with":"1znfzpOp3JMXZAKHrbF0JtmtzU0bjD9Kh","30|1995|95|eig|with":"1Bgl8oN162UngtiDsrC5Nuxk3lemxHVP0","30|1995|95|conn|with":"1wAXY7Lx_K7nQ3Kzw9orKvxgO6Ruqts7Q","30|1995|90|wid|with":"1RxqWMyazKs_NWJ6La1HXdgBqxuDbYLp6","30|1995|95|wid|with":"1zlGTss2jj58s6D79cmCG4SOEK78DZ6db","30|1995|25|wid|with":"13e9Bf5Rw6BaVdhL1daOWQwEZSqPCUahu","30|1995|25|conn|with":"1MVIMIFf5blrmOxSdc8nq2miSwMWD9d5G","30|1995|25|eig|with":"17k6O9hWk4Ah-kHf2r5dr85_OAltE1SuM","30|1995|50|wid|with":"1z2KAUhrEcWpDVKzX5GRq7uBNbGOT2T1g","30|1995|50|eig|with":"1pEiaC4JXp2IG2eqLJFW6SsRP-kPujnKk","30|1995|50|conn|with":"1N_mz0_CelTZTKeNROVR_biLnDxFU8O1L","30|1995|75|eig|with":"1fl__cGyrcI4po16_eXjLDqlUXFJSJbEC","30|1995|80|eig|with":"1-zRurwF8d1WZusOBf1Fsz0ZjqiJH8973","30|1995|75|wid|with":"1EJyQiPH_l1t4s4qRf1qooOZCQ_5nalH-","30|1995|80|wid|with":"1VI4zeTHbjr7egugqalKx7cyEW61yAAw8","30|1995|80|conn|with":"11dYMlhHSwcWOEbsvqYhqv6ZcM6g_alRV","30|1995|85|eig|with":"14fdvr2jpMABSmP05TjrDFSj7pLb2kIWh","30|1995|85|wid|with":"10qAEN0PS5bWJVafxqsc8eHQIVDSvrHlG","30|1995|85|conn|with":"1bulWuQqRAPuDgx4ZLXnGQ1Tc8XWOoRB-","30|1995|75|conn|with":"1MRTIytn66y7x3IPXfNTRuJnquuWpkI04","30|1995|90|conn|with":"1QJXW2yza3JeIJD0Sf0f5CT1JoVX0tQY3","5|1996|85|wid|no":"1i0uepriJpB7CARfWiN9b2dEZzmG0kL-P","5|1996|95|conn|no":"1yrWRFrwol-vnyaqjkvcGn14zqDpR3qBV","5|1996|85|conn|no":"16qqPsC7w-BQkzjsVcDnUtMN1bIRFM9mQ","5|1996|90|eig|no":"1xskJ2GU0D8T8-_I8nYVx-gxbtyYJY6b5","5|1996|90|wid|no":"1SrB32ex4lTBOuY7GOMUnQOhb5BF_KhHG","5|1996|95|wid|no":"1maq8qiVDpwxQt5-sFXYZB2FP2yANx-Kp","5|1996|80|wid|no":"1RMszv2p5NOxTTsBn1tfYpMumkx5b4dwb","5|1996|90|conn|no":"16wzH4wCcGrVRJrk9eQs_sVswiopq2XiA","5|1996|95|eig|no":"12H8EKl7yEWwgV4Xz1PAilGsAy5csIQ4E","5|1996|85|eig|no":"1zKsbiKsT27U_wL3_kNx8-H5aSDdkI84s","5|1996|75|eig|no":"12uLD9MMVQj8qq-pzEUVPoqJLCs2d8xtQ","5|1996|50|wid|no":"1JW6iDtaYfqiY2SKHq9p_RpLU_emFyx6Y","5|1996|25|conn|no":"1oGQrX84L7hmfSF4ByCO2AgJl0IDGZGPD","5|1996|25|eig|no":"17S7hsKubNg-MaumKnPVuK4LUybszdQLy","5|1996|50|conn|no":"16ou605ZuHtPK8EcCoOby00M-NBBcwDtg","5|1996|75|wid|no":"1sSQY3Q5aNIl2qS8ST68wBzotCvQLQgDN","5|1996|50|eig|no":"1Fa_yl-v4w47ocuwcnP--NTGI4RrHWu0W","5|1996|75|conn|no":"1VnmHNZOR_24fYZshcn2I8E20H1-Q4kLD","5|1996|25|wid|no":"1qD2kvMS0tv51lzUN2LtjDvWLlNbB4TCC","5|1996|80|eig|no":"1qVpJdfrO7zbRZzAyKLcBsoCdkWjvQiD7","5|1996|80|conn|no":"1rm7Uy9Ez_ef87g7vLCqQ_AAtoGlu0EDv","30|1996|90|conn|no":"1UXcsZ9Ym1YB7WuKUgr1VsVCZmTd99fcz","30|1996|95|wid|no":"1bHI8xcONKZL9gSOY0BE0xUVcej7QlqC6","30|1996|95|conn|no":"1VNisCcn90CA1-IEYw4mcGfedAfsdxvoa","30|1996|90|wid|no":"1k8nW9Or_kzYUi4myH02yAtFp97QqLWD9","30|1996|95|eig|no":"1E0eqQaAOwJVOkv6DIEiLEMSjcRc4CsXL","30|1996|25|conn|no":"1FUvd7Su9smy0VpQFEfnSInwXV615kRHy","30|1996|25|wid|no":"1uAjDA2g90nSlBH2FdoagaMMhnxRwF_7i","30|1996|25|eig|no":"11ppVDUnGPtkP46kS2psxprC04wR4GQfG","30|1996|85|wid|no":"1lVi-7kDmQ33oSteIBAE8xkf4hA7-kGy2","30|1996|50|conn|no":"1xtRJPPZWLaxreaP6QVxbJzEH1Vm3z0GK","30|1996|50|wid|no":"1iFIos-okBz_meQl10yvmoJ56yKxKBP-K","30|1996|50|eig|no":"1R-lH5vGQvkgBb74s5mZrm-Xjf4dpcLu8","30|1996|80|eig|no":"17OEqSkqXFGhXwVMiSnLdVt2R-pp1ko_z","30|1996|75|eig|no":"1kPQG6CVs01wG2lacTEeGeDGGo_mvhbsu","30|1996|85|conn|no":"17Ed4VdylfCVsHEvXcLTHLosYv0UsTqoi","30|1996|80|wid|no":"1ySgvbuMhiQW_O86r-oykfGGQNbKg6p-l","30|1996|80|conn|no":"1dDaYhqCn0mSpGVL-UeZ9TD-UvpYwupZ2","30|1996|85|eig|no":"1jESDpfgYSAKUseKoEtrqa462eZ_qIEJS","30|1996|75|wid|no":"1dU1G-E0ifeo8vHIHa47YTqzKj3bgPL2Z","30|1996|75|conn|no":"1O5SvTbFkrwYUL3E-ML9vysKcJPHdxgKy","30|1996|90|eig|no":"1w7hQnqC2_FyTYrFm3sjDRvLrIk0gtGlj","5|1996|95|eig|with":"1bPr8e3MszLSzJ5coGalqp3B4Pf1aZhnh","5|1996|90|wid|with":"1lKvom4btK4C8oNZHaob-WNphzXquQsOU","5|1996|95|wid|with":"14h3dj1whS4__eJwrd1CLUj_sp4gOpgW0","5|1996|95|conn|with":"1OZbSd3x8SFi2lplPxGrHdj-jAhjyhwgc","5|1996|80|wid|with":"1hSEar2Px1smpYxKH6GzXn68JUb-dvr0w","5|1996|90|conn|with":"1gSo9FwH2wOeKpGqw7jpXHlKJGJ9JKa45","5|1996|80|conn|with":"1-P4NS_FER_ccsa0v8-tAsM4cGP0wuH8P","5|1996|85|eig|with":"1--zSGb5Gd2y0jHV7OCP8Lwus4MUO1jCM","5|1996|80|eig|with":"1scqrP3zLmtT5oqihFUsQ-XeMIB1fMgRA","5|1996|85|wid|with":"1w8AU28er2pYu1B-qzkRPUxuYrWDnI1yp","5|1996|85|conn|with":"1u6UnZ2qB-Y_bfbnnbLUmKMtn8iTnjbMZ","5|1996|90|eig|with":"16Ogv0syHxvmeOcFfXEXMvKFnBqEYiRpY","30|1996|75|wid|with":"13urq2Ik9MdIlvo-YVq92oSnBMCyZfeAa","30|1996|90|conn|with":"1B32qYy6kmkK7WniDX92UNniV-7-RmAn6","30|1996|90|eig|with":"1-HBvsPsQLXXOTZq2L1PyIMc3lD5YgeD-","30|1996|80|conn|with":"1sEHhqhX9z7ClBpKtSHPqkcRgZ7ASnfY3","30|1996|75|eig|with":"1jfe3a4mjyxtD1-wZw2I0Pgoy7kJNXsms","30|1996|85|wid|with":"180WMqm-F7hf9WptrIrPilMa9fNhZBi37","30|1996|80|eig|with":"15aqq2CSABranv0QhE7hO_9WweX1YubBv","30|1996|85|eig|with":"1u9bGP1r3RFPIBTBgIS8yiX3RHhtTMGfd","30|1996|80|wid|with":"1Dsrs75FrxGUgW2B0KObLJC5jDxdKGcap","30|1996|75|conn|with":"16IRIUD3PvQNaXptPdQaXwq9RoB1PVwHx","30|1996|90|wid|with":"1dLSF8V2kA462BkyY7ibX9a1RpPvhrwv6","30|1996|85|conn|with":"19psWz-1fQxG14tcjYJY6tV4LDusZEmKL","30|1996|95|eig|with":"1ohSdD_yD0Cve-MeXKm6gTfwJjctSvuWj","30|1996|95|wid|with":"1pq7hDFwknoLLL5lM-zpHloZyuY-Qcbd5","30|1996|95|conn|with":"1QtfzIpnLyw_VokGk33bWIQYfb7D5pZL5","30|1996|50|eig|with":"1PUYEiGGHw4efptSDeU0m4YkXSLWg361q","30|1996|25|conn|with":"1HdWJ3xV2P0SwA6nGOFHRLEG2_ujee-JK","30|1996|25|wid|with":"1cIRl3uP38v5dmRikNSXJ06fn306bJXpX","30|1996|50|conn|with":"15_QvHSCuHVYZ6D5dr4gGGrewP9p8vJb2","30|1996|25|eig|with":"1FN-l92lXsyabFLTNZfw__eEOiGxuTYlL","30|1996|50|wid|with":"1WWhF23iUiG-l8eKDUi_LJDbkzw5SiBAK"};
+const FILE_VIEW = id => `https://drive.google.com/file/d/${id}/view`;
+const FILE_EMBED = id => `https://drive.google.com/file/d/${id}/preview`;
+
+const YEARS = [[1993,'moderate'],[1995,'low'],[1996,'high']];
+const RUNS = [5,30];
+const PCTS = [25,50,75,80,85,90,95];
+const PARAMS = [['conn','Connectivity strength'],['eig','Eigenvalue centrality'],['wid','Weighted in-degree']];
+const PARAM_TOK = {conn:'',eig:'EigCent',wid:'WeightInDeg'};
+
+// Default states — same except LIS, so the first view is an immediate A/B contrast
+const STATE = {
+  A:{runs:30,year:1993,pct:75,param:'conn',lis:'with'},
+  B:{runs:30,year:1993,pct:75,param:'conn',lis:'no'}
+};
+
+function keyOf(s){return `${s.runs}|${s.year}|${s.pct}|${s.param}|${s.lis}`;}
+function filenameOf(s){
+  const p = PARAM_TOK[s.param] ? '_'+PARAM_TOK[s.param] : '';
+  const l = s.lis==='no' ? '_NoLIS' : '';
+  return `Grayscale_Connectivity_${s.runs}runs_BOPPolys_${s.year}_${s.pct}${p}${l}.pdf`;
+}
+// Readout with the user-controlled tokens highlighted
+function readoutHTML(s){
+  const p = PARAM_TOK[s.param] ? '_<span class="t-var">'+PARAM_TOK[s.param]+'</span>' : '';
+  const l = s.lis==='no' ? '_<span class="t-var">NoLIS</span>' : '';
+  return `Grayscale_Connectivity_<span class="t-var">${s.runs}</span>runs_BOPPolys_`+
+         `<span class="t-var">${s.year}</span>_<span class="t-var">${s.pct}</span>${p}${l}.pdf`;
+}
+
+function panelTemplate(id){
+  const s = STATE[id];
+  const other = id==='A'?'B':'A';
+  return `
+  <div class="panel" data-panel="${id}">
+    <div class="panel-head">
+      <span class="panel-tag"><span class="dot"></span>Panel ${id}</span>
+      <button class="match-btn" data-match="${id}">Match panel ${other}</button>
+    </div>
+    <div class="controls">
+      <div class="field">
+        <label class="lab" for="${id}-year">Flow year</label>
+        <select id="${id}-year" data-k="year">
+          ${YEARS.map(([y])=>`<option value="${y}" ${y===s.year?'selected':''}>${y}</option>`).join('')}
+        </select>
+        <span class="flowchip" id="${id}-flow"></span>
+      </div>
+      <div class="field">
+        <label class="lab" for="${id}-runs">Releases / runs</label>
+        <select id="${id}-runs" data-k="runs">
+          ${RUNS.map(r=>`<option value="${r}" ${r===s.runs?'selected':''}>${r} runs</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="lab" for="${id}-pct">Connectivity threshold</label>
+        <select id="${id}-pct" data-k="pct">
+          ${PCTS.map(p=>`<option value="${p}" ${p===s.pct?'selected':''}>${p}th percentile</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="lab" for="${id}-param">Output metric</label>
+        <select id="${id}-param" data-k="param">
+          ${PARAMS.map(([v,l])=>`<option value="${v}" ${v===s.param?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field span">
+        <label class="lab">Long Island Sound source populations</label>
+        <div class="seg" role="group" aria-label="LIS sources, panel ${id}">
+          <button data-lis="with" aria-pressed="${s.lis==='with'}">Include LIS</button>
+          <button data-lis="no" aria-pressed="${s.lis==='no'}">Exclude LIS</button>
+        </div>
+      </div>
+    </div>
+    <div class="readout" id="${id}-readout"></div>
+    <div class="preview" id="${id}-preview">
+      <iframe id="${id}-frame" title="Connectivity plot, panel ${id}" loading="lazy" allow="autoplay"></iframe>
+      <div class="na">
+        <div class="na-icon">∅</div>
+        <h3>Not generated</h3>
+        <p>This combination wasn't produced. The 5-run set at 25/50/75 with LIS included doesn't exist for 1995–1996.</p>
+      </div>
+    </div>
+    <div class="panel-foot">
+      <span id="${id}-count"></span>
+      <a class="drive-link" id="${id}-open" href="#" target="_blank" rel="noopener">Open in Drive ↗</a>
+    </div>
+  </div>`;
+}
+
+const stage = document.getElementById('stage');
+stage.innerHTML = panelTemplate('A') + panelTemplate('B');
+
+function render(id){
+  const s = STATE[id];
+  const k = keyOf(s);
+  const fid = MANIFEST[k];
+  document.getElementById(`${id}-readout`).innerHTML = readoutHTML(s);
+  const flow = (YEARS.find(y=>y[0]===s.year)||[])[1]||'';
+  document.getElementById(`${id}-flow`).innerHTML = `<b>${flow}</b> flow`;
+  const prev = document.getElementById(`${id}-preview`);
+  const frame = document.getElementById(`${id}-frame`);
+  const open = document.getElementById(`${id}-open`);
+  if(fid){
+    prev.classList.remove('empty');
+    const src = FILE_EMBED(fid);
+    if(frame.src!==src){ frame.style.opacity=0; frame.src=src; frame.onload=()=>frame.style.opacity=1; }
+    open.href = FILE_VIEW(fid); open.setAttribute('aria-disabled','false');
+  }else{
+    prev.classList.add('empty'); frame.removeAttribute('src');
+    open.href='#'; open.setAttribute('aria-disabled','true');
+  }
+}
+function refreshCounts(){
+  const total = Object.keys(MANIFEST).length;
+  ['A','B'].forEach(id=>{
+    const el=document.getElementById(`${id}-count`);
+    if(el) el.textContent = `${total} plots available`;
+  });
+}
+
+// Wire controls
+['A','B'].forEach(id=>{
+  const panel = stage.querySelector(`.panel[data-panel="${id}"]`);
+  panel.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change',e=>{
+      const k=e.target.dataset.k;
+      let v=e.target.value; if(k==='runs'||k==='pct'||k==='year') v=parseInt(v,10);
+      STATE[id][k]=v; render(id);
+    });
+  });
+  panel.querySelectorAll('.seg button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      STATE[id].lis=btn.dataset.lis;
+      panel.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed', b===btn));
+      render(id);
+    });
+  });
+  panel.querySelector('.match-btn').addEventListener('click',()=>{
+    const other = id==='A'?'B':'A';
+    STATE[id] = {...STATE[other]};
+    syncControls(id); render(id);
+  });
+});
+
+function syncControls(id){
+  const s=STATE[id];
+  const panel=stage.querySelector(`.panel[data-panel="${id}"]`);
+  panel.querySelector(`#${id}-year`).value=s.year;
+  panel.querySelector(`#${id}-runs`).value=s.runs;
+  panel.querySelector(`#${id}-pct`).value=s.pct;
+  panel.querySelector(`#${id}-param`).value=s.param;
+  panel.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.lis===s.lis));
+}
+
+// Layout mode
+const mCompare=document.getElementById('mode-compare');
+const mSingle=document.getElementById('mode-single');
+function setMode(single){
+  stage.classList.toggle('single',single);
+  mSingle.setAttribute('aria-pressed',single);
+  mCompare.setAttribute('aria-pressed',!single);
+}
+mCompare.addEventListener('click',()=>setMode(false));
+mSingle.addEventListener('click',()=>setMode(true));
+
+render('A'); render('B'); refreshCounts();
+</script>
+</body>
+</html>
