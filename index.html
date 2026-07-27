@@ -1,376 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Larval Transport Connectivity Viewer — Billion Oyster Project</title>
+<title>BOP Larval Connectivity Viewer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#10262b; --ink-2:#17343a; --paper:#eaeeeb; --panel:#ffffff;
-  --line:#ccd6d1; --line-strong:#aebdb7; --muted:#5c6f6b; --text:#152a2e;
-  --tide:#2f9c8b; --tide-deep:#1c6a5e; --tide-wash:#e2efec;
-  --warn:#8a5a24; --warn-wash:#f3e9db;
-  --radius:10px; --gap:18px;
-}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  background:var(--paper); color:var(--text);
-  font-family:'Space Grotesk',system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased; line-height:1.45;
-}
-.wrap{max-width:1400px;margin:0 auto;padding:26px 22px 60px}
-
-/* Header */
-header.masthead{
-  border-bottom:1.5px solid var(--ink);
-  padding-bottom:16px;margin-bottom:22px;
-  display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 28px;
-}
-.title-block{flex:1 1 340px;min-width:280px}
-.eyebrow{
-  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--tide-deep);font-weight:600;margin:0 0 6px;
-}
-h1{
-  font-size:clamp(22px,3.2vw,32px);line-height:1.05;margin:0;
-  font-weight:600;letter-spacing:-.01em;color:var(--ink);
-}
-.sub{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:60ch}
-.modeswitch{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;align-self:flex-end}
-.modeswitch button{
-  font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.02em;
-  background:transparent;color:var(--ink);border:0;padding:9px 16px;cursor:pointer;
-}
-.modeswitch button[aria-pressed="true"]{background:var(--ink);color:#fff}
-.modeswitch button:focus-visible{outline:2px solid var(--tide);outline-offset:2px}
-
-/* Panels grid */
-.stage{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);align-items:start}
-.stage.single{grid-template-columns:1fr;max-width:920px;margin:0 auto}
-.stage.single .panel[data-panel="B"]{display:none}
-
-.panel{
-  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  overflow:hidden;display:flex;flex-direction:column;
-  box-shadow:0 1px 0 rgba(16,38,43,.03);
-}
-.panel-head{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:11px 14px;background:var(--ink);color:#eaf3f0;
-}
-.panel-tag{
-  display:inline-flex;align-items:center;gap:9px;
-  font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
-}
-.dot{width:9px;height:9px;border-radius:50%;background:var(--tide);box-shadow:0 0 0 3px rgba(47,156,139,.25)}
-.panel[data-panel="B"] .dot{background:#e0a13c;box-shadow:0 0 0 3px rgba(224,161,60,.22)}
-.match-btn{
-  font-family:inherit;font-size:11.5px;font-weight:500;color:#bfe0d8;
-  background:transparent;border:1px solid rgba(191,224,216,.4);border-radius:6px;
-  padding:4px 9px;cursor:pointer;white-space:nowrap;
-}
-.match-btn:hover{background:rgba(191,224,216,.12);color:#fff}
-.match-btn:focus-visible{outline:2px solid var(--tide);outline-offset:1px}
-
-/* Controls */
-.controls{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:11px 12px;padding:14px;border-bottom:1px solid var(--line);
-}
-.field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field.span{grid-column:1 / -1}
-label.lab{
-  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);font-weight:600;
-}
-select{
-  font-family:inherit;font-size:13.5px;color:var(--text);font-weight:500;
-  background:#fbfcfb;border:1px solid var(--line-strong);border-radius:7px;
-  padding:8px 30px 8px 10px;cursor:pointer;appearance:none;width:100%;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%235c6f6b' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
-  background-repeat:no-repeat;background-position:right 10px center;
-}
-select:focus-visible{outline:2px solid var(--tide);outline-offset:1px;border-color:var(--tide)}
-
-/* LIS segmented toggle */
-.seg{display:flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden}
-.seg button{
-  flex:1;font-family:inherit;font-size:12.5px;font-weight:500;
-  background:#fbfcfb;color:var(--muted);border:0;padding:8px 6px;cursor:pointer;
-}
-.seg button[aria-pressed="true"]{background:var(--tide-wash);color:var(--tide-deep);font-weight:600}
-.seg button:focus-visible{outline:2px solid var(--tide);outline-offset:-2px}
-.seg button + button{border-left:1px solid var(--line-strong)}
-
-/* Flow chip inline with year */
-.flowchip{font-size:11px;font-weight:600;color:var(--muted)}
-.flowchip b{color:var(--tide-deep);font-weight:600}
-
-/* Token readout — the signature */
-.readout{
-  font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;
-  padding:10px 14px;background:var(--ink-2);color:#cfe0db;
-  word-break:break-all;border-bottom:1px solid var(--line);
-}
-.readout .t-var{color:#8fe0d0;font-weight:600}
-.readout .t-dim{color:#7f9b95}
-.readout .muted{color:#7d938e}
-
-/* Preview */
-.preview{position:relative;background:#f4f6f5;aspect-ratio:11/8.5;width:100%}
-.preview iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
-.preview.empty iframe{display:none}
-.na{
-  position:absolute;inset:0;display:none;flex-direction:column;
-  align-items:center;justify-content:center;gap:10px;text-align:center;
-  padding:30px;background:repeating-linear-gradient(45deg,#f4f6f5,#f4f6f5 12px,#eef1ef 12px,#eef1ef 24px);
-}
-.preview.empty .na{display:flex}
-.na .na-icon{font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--warn);font-weight:600}
-.na h3{margin:0;font-size:15px;color:var(--ink)}
-.na p{margin:0;font-size:12.5px;color:var(--muted);max-width:34ch}
-
-/* Panel foot */
-.panel-foot{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 14px;font-size:12px;color:var(--muted);
-}
-.drive-link{
-  color:var(--tide-deep);text-decoration:none;font-weight:600;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.drive-link[aria-disabled="true"]{color:var(--line-strong);pointer-events:none}
-.drive-link:hover{text-decoration:underline}
-
-/* Notes */
-.notes{
-  margin-top:26px;border-top:1px solid var(--line);padding-top:16px;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 26px;
-}
-.note h4{margin:0 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
-.note p{margin:0;font-size:12.5px;color:var(--muted)}
-.note code{font-family:'IBM Plex Mono',monospace;font-size:11px;background:#e0e6e3;padding:1px 5px;border-radius:4px;color:var(--ink-2)}
-.gap-flag{color:var(--warn);font-weight:600}
-
-@media (max-width:860px){
-  .stage{grid-template-columns:1fr}
-  .stage.single{max-width:none}
-  .modeswitch{align-self:flex-start}
-}
-@media (prefers-reduced-motion:no-preference){
-  .preview iframe{transition:opacity .18s ease}
-}
+  :root{
+    --bg:#0d1a1e; --bg2:#0f1f24; --panel:#14282e; --panel2:#183036;
+    --line:#22434b; --line2:#2c545e;
+    --ink:#e9f2f0; --muted:#8fabaa; --faint:#5f7d7d;
+    --teal:#54c4b3; --teal-d:#2f8377; --sand:#d8b26e; --rose:#d98a7a;
+    --hatch:#1a3239;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:
+    radial-gradient(1200px 700px at 15% -10%, #123039 0%, transparent 60%),
+    radial-gradient(1100px 800px at 110% 10%, #10262c 0%, transparent 55%),
+    var(--bg);
+    color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif;}
+  a{color:var(--teal)}
+  header.top{padding:26px clamp(16px,4vw,44px) 10px;max-width:1500px;margin:0 auto}
+  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:clamp(20px,2.4vw,30px);font-weight:700;letter-spacing:-.02em;margin:0}
+  .sub{color:var(--muted);font-size:14px;font-weight:500}
+  .desc{color:var(--muted);font-size:13.5px;line-height:1.55;max-width:74ch;margin:12px 0 4px}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{all:unset;cursor:pointer;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted)}
+  .seg button[aria-pressed=true]{background:var(--teal-d);color:#eafffb}
+  main{max-width:1500px;margin:0 auto;padding:14px clamp(16px,4vw,44px) 40px;
+       display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  main.single{grid-template-columns:1fr;max-width:1040px}
+  main.single .panel[data-panel="B"]{display:none}
+  .panel{background:linear-gradient(180deg,var(--panel) 0%,var(--bg2) 100%);
+         border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .phead{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .pill{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        color:#0d1a1e;background:var(--teal);border-radius:6px;padding:3px 8px}
+  .pill.b{background:var(--sand)}
+  .phead .match{margin-left:auto}
+  button.match{all:unset;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);
+        border:1px solid var(--line2);border-radius:8px;padding:6px 11px}
+  button.match:hover{color:var(--ink);border-color:var(--teal-d)}
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;padding:14px}
+  .ctl{display:flex;flex-direction:column;gap:5px}
+  .ctl label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+  .ctl select{all:unset;cursor:pointer;background:var(--panel2);border:1px solid var(--line2);
+        border-radius:9px;padding:9px 11px;font-size:13.5px;font-weight:500;color:var(--ink);
+        background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%238fabaa' stroke-width='1.5' fill='none'/></svg>");
+        background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+  .ctl select:focus{border-color:var(--teal)}
+  .viewer{position:relative;margin:0 14px;border:1px solid var(--line);border-radius:12px;
+        overflow:hidden;background:#fbfbf9;aspect-ratio:4/5}
+  .viewer iframe{width:100%;height:100%;border:0;display:block}
+  .missing{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+        gap:8px;text-align:center;padding:24px;color:var(--muted);
+        background:repeating-linear-gradient(45deg,var(--hatch) 0 12px,#16292f 12px 24px)}
+  .missing strong{color:var(--ink);font-size:15px}
+  .missing span{font-size:12.5px;max-width:34ch;line-height:1.5}
+  .readout{padding:12px 14px 16px;display:flex;flex-direction:column;gap:8px}
+  .fname{font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.6;color:var(--faint);
+        word-break:break-all;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .fname em{font-style:normal;color:var(--teal);font-weight:500}
+  .fname .mut{color:#43605f}
+  .rline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .rline a{font-weight:600;text-decoration:none;border-bottom:1px solid var(--teal-d)}
+  footer{max-width:1500px;margin:0 auto;padding:0 clamp(16px,4vw,44px) 48px;color:var(--faint);font-size:12.5px;line-height:1.7}
+  footer .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+  footer .legend span{display:inline-flex;align-items:center;gap:7px}
+  footer b{color:var(--muted);font-weight:600}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block}
+  @media(max-width:820px){main{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="masthead">
-    <div class="title-block">
-      <p class="eyebrow">Billion Oyster Project · Larval Transport Modelling</p>
-      <h1>Connectivity Plot Viewer</h1>
-      <p class="sub">Two independent panels. Set each to any run count, flow year, connectivity threshold, output metric, and Long Island Sound scenario — then read them side by side.</p>
-    </div>
-    <div class="modeswitch" role="group" aria-label="Layout">
-      <button id="mode-compare" aria-pressed="true">Compare · 2 panels</button>
-      <button id="mode-single" aria-pressed="false">Single · 1 panel</button>
-    </div>
-  </header>
-
-  <div class="stage" id="stage">
-    <!-- panels injected -->
+<header class="top">
+  <div class="brand">
+    <h1>Larval Connectivity Viewer</h1>
+    <span class="sub">Billion Oyster Project · particle-transport network model</span>
   </div>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="Layout">
+      <button id="layCompare" aria-pressed="true">Compare</button>
+      <button id="laySingle" aria-pressed="false">Single</button>
+    </div>
+  </div>
+</header>
 
-  <section class="notes">
-    <div class="note">
-      <h4>Reading the code</h4>
-      <p>The mono line under each panel is the exact source filename. Highlighted tokens are the ones you control.</p>
-    </div>
-    <div class="note">
-      <h4>Flow years</h4>
-      <p><b>1993</b> moderate · <b>1995</b> low · <b>1996</b> high freshwater flow.</p>
-    </div>
-    <div class="note">
-      <h4>Output metrics</h4>
-      <p>Connectivity strength, eigenvalue centrality, weighted in-degree — computed on the same run set.</p>
-    </div>
-    <div class="note">
-      <h4>Coverage</h4>
-      <p>Complete — all <b>252</b> combinations (2 run sets &times; 3 flow years &times; 7 thresholds &times; 3 metrics &times; 2 LIS scenarios) are present.</p>
-    </div>
+<main id="stage" class="compare">
+  <section class="panel" data-panel="A">
+    <div class="phead"><span class="pill">Panel A</span>
+      <button class="match" data-from="A">Copy A &rarr; B</button></div>
+    <div class="controls"></div>
+    <div class="viewer"></div>
+    <div class="readout"></div>
   </section>
-</div>
+  <section class="panel" data-panel="B">
+    <div class="phead"><span class="pill b">Panel B</span>
+      <button class="match" data-from="B">Copy B &rarr; A</button></div>
+    <div class="controls"></div>
+    <div class="viewer"></div>
+    <div class="readout"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--teal)"></i><b>Region</b> Harbor-wide (bad polygons &amp; LIS sources removed), Jamaica Bay, Western Long Island Sound</span>
+    <span><i class="dot" style="background:var(--sand)"></i><b>Flow year</b> 1993 moderate &middot; 1995 low &middot; 1996 high</span>
+    <span><i class="dot" style="background:var(--rose)"></i><b>Not generated</b> that combination wasn't produced</span>
+  </div>
+  <div id="cov"></div>
+</footer>
 
 <script>
-const MANIFEST = {"30|1993|95|conn|no":"1CffYOa_3H7JIjotYEZpvw1rzram4vE9Q","5|1993|25|eig|no":"1PmkTV0g-_w8XEPz0bmZ3EzZXVwoxNDgC","5|1993|95|wid|no":"1FjAGdxjKBi0GqUyB-u0s4-Zztzl2y3Wa","5|1993|95|conn|no":"182-_gcnSUdgQ8f9THnqDpIm-Dssd67xJ","5|1993|75|wid|no":"1LeBFEzDNq302Zf6_SOXtolgBJ4lf5zYK","5|1993|80|wid|no":"1YzLmMKTaqDhmgCMa5GdH7Bo4HwTquHBW","5|1993|75|conn|no":"1PgHAbGS68mULlyojhGVCJYHExOvngrzi","5|1993|50|eig|no":"19LkKeS5QzYLIrrUupd55aVUY4-gekomo","5|1993|50|conn|no":"1n4bwhcmZejboZdFCA8_o22ZRaGMorxKl","5|1993|50|wid|no":"1WEPVLlcE3ekqPoAeDpKdxrZ8aH5lhgrN","5|1993|80|conn|no":"1FyO0m7pT1lDJjwNsWtN6mHU8f0hGH5PA","5|1993|90|conn|no":"1ONPwt0WVYKzCiUR8vUu1n9_XkP4oqGkY","5|1993|85|conn|no":"1kTVtPIW7XbMN_sXYYt0FTurthX8T1v_9","5|1993|85|eig|no":"14zryYuC-9Ia9Rem_xxcj8EOjah2FcReX","5|1993|90|wid|no":"1_ZVJmfsqzJzPcMaet6gEOy2lrdMFlTMB","5|1993|80|eig|no":"1bV0IeyForlPcppcUPE-cGTLeEIjaDMym","5|1993|90|eig|no":"15W5jjEGHSaD_3Ga7N0ZFlkSh-wOvt5l2","5|1993|85|wid|no":"18VjJ4ZwW8n_6phue_1DYRD20d-FY80KR","5|1993|95|eig|no":"1O2vwZckmEZ5poaCBJ_1uBYeKUeOwdwDc","5|1993|75|eig|no":"1M1I3pTzw4km5gopwUD1cQjfd_ijhe1os","5|1993|25|wid|no":"19mAltGZefyiA99xjOrmN1kqNcmfFibnX","5|1993|25|conn|no":"1XGNZALKzAiI6RYr7SoHGDZfY-OKaYuSP","30|1993|90|eig|no":"17CN0Non429qr0ozOtP0H-biYRP6vTqVa","30|1993|90|wid|no":"1n1r2c11Hfldx_Tk4mAolDiL49tar75KX","30|1993|90|conn|no":"1MXTMD-87PUpwJybbzf0y235pxYm5BuAA","30|1993|75|wid|no":"1XqL5GkY8Nvxbn3E1ekdtql-WgdXo5QtO","30|1993|80|eig|no":"1MqM-Q9Yl6f-KP3_idDInVtlf6zdW6F38","30|1993|80|conn|no":"1nSL7L_r5fUSAT21pogCuewkt2AVc45IZ","30|1993|80|wid|no":"12YdoBeDAVOjVaxEW1RZPz45HfP_7jmCw","30|1993|85|wid|no":"1XPrYtbmnJhCCHY3FyEX7gxp7mNiO5o5h","30|1993|85|conn|no":"1Vt0dq9-tjtsu8xeLEBfPyAjmw-g1cmqi","30|1993|95|eig|no":"1Fc3upA1b8AOaDaVckrUqY4EcHWLL1Kkx","30|1993|85|eig|no":"1Cdt1n8jwgf_3cJvDYyZoS970TE2dwIro","30|1993|95|wid|no":"17N9psbMENdPxBDLzbKmtaEndsZChPlHh","30|1993|25|conn|no":"1yXRgVHn20B0nX4lBkuKA3Kfz0GOOZ3zA","30|1993|50|wid|no":"1Gx7B_pBqgXDHGbfLN_UublNjVylV8gGm","30|1993|25|eig|no":"15hT69FJPRJXER7H2go73i-Wh03x0hl2e","30|1993|25|wid|no":"137oK__DSqBSM2TrNkgTDij6t4LCmoX_n","30|1993|50|eig|no":"1G6h-4lKyLHf0IIieOxAVqyHJwH09QnzF","30|1993|50|conn|no":"1ee0fNdHy8DzTsgyI9yNwD8SuY_XztL0N","30|1993|75|conn|no":"1s_ATYjnVuY_q769mNFplUf9TsBFE0it8","30|1993|75|eig|no":"1PiQysukdvCSJa_VvIjMmGk6pr7ZucqLD","5|1993|85|wid|with":"101CsTiR63ZS-Iw-2KGnUkqiN8iK8eKsO","5|1993|85|eig|with":"1n80cbil5sXoU6YJJsQOsfM7yJYLgfL2I","5|1993|80|eig|with":"1IImNwNs9M3JEQghW_hCOfYDke2HKICYX","5|1993|90|wid|with":"1RMPOZQh047mmLjdyPEaVIANAoDxdJysE","5|1993|80|conn|with":"1J_T4d42rhq4QiD3cs8Dxr0pkjm49GMVX","5|1993|95|eig|with":"1bOh63om_SrlBrcs9G_8ox0yy-AmEzqvL","5|1993|90|eig|with":"1gLPspz7yKRUKTyakwA5w-JmFreADvsF2","5|1993|95|conn|with":"1o8ebVQZwXBsDKM0A5B8od5yuooIwisit","5|1993|95|wid|with":"1aujp6btAPdGrxPRP0pltPWJR0SDBmq3K","5|1993|80|wid|with":"1H2qWVQVBvadsZ66H2t4G3gkOgP3IQdqv","5|1993|90|conn|with":"1ExYCS_qmz1sqHcNC3-SBIvzQs83gnmel","5|1993|75|eig|with":"1kKhKps997Ff2OhueY_SkDKb5QKm8HtTH","5|1993|85|conn|with":"1cBb2I8cw_FpAWF6vF0nkvc7ceHsdpoQS","5|1993|75|wid|with":"1BnvLTsGBvCzdgH-vDqKl9rO86kTak2ls","5|1993|50|eig|with":"1LK9sakAOzerORzmJgBsR-rvwEsD0ytoN","5|1993|25|eig|with":"1rGu1GFEu1T7YR19EfEgjD3u7KOMFtVrr","5|1993|25|conn|with":"1Z9wks1_AOw1jcV-sBFgEe_FGzwZTiNN6","5|1993|75|conn|with":"1QaUV5nDWO_NNuE84CIi2mpo0XOyWo0NB","5|1993|25|wid|with":"1l2QvSdStt35SsXSQImcaL4T72bf8vu1D","5|1993|50|conn|with":"1OgMnhKEH3Va-s_xYybiVfxHJX1WCGHAZ","30|1993|90|wid|with":"1cU_XRYyhFfIzeXBLc92JXPo7EBWdE-cD","30|1993|95|wid|with":"1L34nq2VgYtnfKvS4HU2JonSrZBdQ2vFA","5|1993|50|wid|with":"1-y-iIlK6fmaTajT4Tv2QhcdVHJCTglDq","30|1993|95|eig|with":"1UtR_JqXbzpF__7i2AQdqw7XJA59e5sBR","30|1993|90|eig|with":"1NMLDztdAsl_79cGwr7gwaob_6BCBvhGA","30|1993|85|wid|with":"1RHQDsY-bUP9VnKEQcwPCMSe5r1bqgD38","30|1993|85|eig|with":"1XmkO3KVXxD8PH1wi6M6yfJNz1w3Ii9Vn","30|1993|90|conn|with":"124IqDlDKTMf_Me2FruNg0U30dkfUB_M8","30|1993|85|conn|with":"1YKX5Yw-BUsntPFSeCD-3x9AdxR0BzbMQ","30|1993|95|conn|with":"1Xcbt2DhNRuyiwSCulnQhYgro124rC9Q0","30|1993|25|eig|with":"1S0UVDn9FOF_lW-XU9chiGXvoXU0yXXrB","30|1993|25|wid|with":"1-uOnZEmeAiji7KQBcolqCkx5fF87zeXA","30|1993|50|eig|with":"1vgAKD-Uz_1uM95Mr55MbFjwWXiT_2owL","30|1993|50|wid|with":"1WWzhGty-Gpm3KXzl5Is-HhmoWpdU8P_P","30|1993|50|conn|with":"1WshVbY0JXGEiqiHX61-774FF5gEepatR","30|1993|25|conn|with":"1NqSLbsHMLMLYZkCcFVEB4iIkTCQH4Kwd","30|1993|80|conn|with":"11rxz4uu_B_2TIWDbq3FxqvCsXxexqDb1","30|1993|75|eig|with":"1YEKTjTlxYDIcshcWu3TwX053E4U60fq7","30|1993|75|conn|with":"1uEXTbTBWEQ0szS5Db2OfuZAwprrI6aNk","30|1993|80|eig|with":"1PIOmR-wVQxdQXtPIIb9GcCORjyG7BKXZ","30|1993|75|wid|with":"1P-EcaylJKf_9zGyl7IZKKSDpKzgD2rD0","30|1993|80|wid|with":"1ZVj2iN_buD8t7kwmDqPMblEnXJPJKsWF","5|1995|95|wid|no":"1QY9KnKqJlfRb9kmprT9S9aKlYQJN7u9C","5|1995|85|conn|no":"1nGcwXvzPf9fyn8hHlRgFull-96M5OtaE","5|1995|80|wid|no":"11In2TIVbIr4RubgzW5IZyEKAkVf2ix87","5|1995|90|conn|no":"1vjlbsqnmJDPNs0F-MxwLrc1g0trZ58Cv","5|1995|95|conn|no":"1ATBK8GCCL8iUZbMSuJR2s2cOBcIHujry","5|1995|85|wid|no":"1sy3uvVCXwuwaY6NwIdnnlO9rzGqieLKI","5|1995|90|wid|no":"1HnyhstGSDcV7OMDJoMpF_xdbncJG3Lhx","5|1995|85|eig|no":"1r0hJDthM4rd8Y1MEquWqcoKN3RCqorUJ","5|1995|95|eig|no":"1_hRFni2xP7mfwWRhedmuerdKGyNPqY-q","5|1995|90|eig|no":"1LtYbxfhDtPDets0dOVYr_zf7kmdedhnP","5|1995|25|wid|no":"1lQ7ShFbgzLRFHQIhRg5qiOGwxlwr4E26","5|1995|50|eig|no":"1Wyd1rMW3cMar_Xx2rVDdwOOergM6xFtb","5|1995|25|conn|no":"1gD-NDmpp24SX5dcuVJeU9D91GFbosPqy","5|1995|50|wid|no":"1IP5D_oougclwvL2gV9gpJ4egoXA4bnXn","5|1995|80|eig|no":"1mxIa5cst-TPMfPIv7mGiJ1x6drlGmhn-","5|1995|25|eig|no":"1fao99Lc4KriUA9sZFBfkC2FE2HbOBDz3","5|1995|75|wid|no":"1c6Bmt2GirGjId5MwI1ze7EKOJw3419l8","5|1995|75|eig|no":"1PBEIy0Hl2ipePrFMv01691N3tVdrNbuM","5|1995|75|conn|no":"1G6jQ-kyOWabjXhF2Uh8Jh15h1tZS0Opz","5|1995|50|conn|no":"1EwjCY0hCelXNgA3wIYXIxwUlR1KCVoYU","30|1995|90|wid|no":"1wHqnCJuhS9eO81FuvSAaJQ21LMGOQQOo","5|1995|80|conn|no":"1HBIXC6frBSBY3DgUS8v3PjrRdA4mZoRI","30|1995|90|conn|no":"1e-wu0gC1GOqw71CIZvPRLX0227uFdvF0","30|1995|95|conn|no":"1zyXy50l6rrmtoQCTKshjInuP8cZ050mw","30|1995|95|eig|no":"19kjq-HC-Gs1hSrAYC9oOHCRMfXyZ_969","30|1995|95|wid|no":"1nzj3VXLEVQITlWhSst9frDt3mpKJQbdR","30|1995|50|conn|no":"1UVetNUs_d5J5fLcOdXbyZf5DlAJmU3hx","30|1995|50|eig|no":"1q3K53gwvbrdupTBBRbg42hLI8cSRGVtU","30|1995|75|conn|no":"1fg5JShzCicFzpB1aB_vPjYn4mJQUjQgL","30|1995|25|eig|no":"1qMgMrMY89ItB5zKkkkAf6NuMlgfrn2KD","30|1995|85|wid|no":"1fj74o0V9IlKHZkhEmON1P-i8oE112xCT","30|1995|85|eig|no":"159OR4OWEEaC3smvlacOGRCP0ROtbt2NJ","30|1995|25|conn|no":"1keY-EdxC3iyRMLFuKONXJuY-htCRrN9j","30|1995|25|wid|no":"1JTQGyD5h1XMwBH7lzMqw8FhWdg-suy6u","30|1995|75|wid|no":"1FbZzW0DsJafu9rQMQqiws_tFF4k7qTTu","30|1995|50|wid|no":"1OKEXwr54HxQieisq7Oma8FSG6inzGb5A","30|1995|80|wid|no":"1JYz6OAkvY-iL0J3GNTVSUvzWfU7eQ642","30|1995|80|eig|no":"1tYaE5Xd1ZhDIM7BLcRq0hl8LQlMiAQ_Z","30|1995|75|eig|no":"117ZWKspdbSBfp7IiKlmE6W9-0XPRJ7k7","30|1995|85|conn|no":"1wdxXID7drR0DypVXdaaUlCaM0fny31Ny","30|1995|80|conn|no":"15sQCMsTSu9plo63ZowK_JdI2kkrmEAT-","30|1995|90|eig|no":"1M1IH67GPXd586O1r5-QfuFcIkKk0QZFB","5|1995|85|conn|with":"1QEuoa_IfqtRDQK31gTdCwUd_AW9sPQT2","5|1995|85|wid|with":"1IXp6BugCgeUWOmiBTJ_Qvy2Cr8womh2a","5|1995|95|wid|with":"1jHoOykzRTjADrVRvhw4C2BI5853sYcUd","5|1995|80|wid|with":"1h0P3QzmWG3A8ELIwk29ubk2rnN9ALeiY","5|1995|90|wid|with":"1M04OHSvXk2D6OW8ALVGeIok7UqS9rABE","5|1995|90|conn|with":"152RoRVa484qnOk6xxtqFSUddo8Yhbb3e","5|1995|85|eig|with":"1JfPZnV6DkjSHPSKswmN-nRfddEju1bEI","5|1995|95|eig|with":"1aDzfLSkh4TOW68-Mx_WxIA83yItWk6Au","5|1995|90|eig|with":"1gT9Rvsk48DRbOQXgF4WSOV9N5sNDrvfB","5|1995|95|conn|with":"1huS4oKIGarsWIUNEQfWlg5LhshsQ2KN3","5|1995|80|eig|with":"15vGylK1cPWu1RpYgn8Mp3NEXuK_ILYaz","5|1995|80|conn|with":"1t_Aoo7xgl0Y-fwR6geU9WcoRNEmacSLt","30|1995|90|eig|with":"1znfzpOp3JMXZAKHrbF0JtmtzU0bjD9Kh","30|1995|95|eig|with":"1Bgl8oN162UngtiDsrC5Nuxk3lemxHVP0","30|1995|95|conn|with":"1wAXY7Lx_K7nQ3Kzw9orKvxgO6Ruqts7Q","30|1995|90|wid|with":"1RxqWMyazKs_NWJ6La1HXdgBqxuDbYLp6","30|1995|95|wid|with":"1zlGTss2jj58s6D79cmCG4SOEK78DZ6db","30|1995|25|wid|with":"13e9Bf5Rw6BaVdhL1daOWQwEZSqPCUahu","30|1995|25|conn|with":"1MVIMIFf5blrmOxSdc8nq2miSwMWD9d5G","30|1995|25|eig|with":"17k6O9hWk4Ah-kHf2r5dr85_OAltE1SuM","30|1995|50|wid|with":"1z2KAUhrEcWpDVKzX5GRq7uBNbGOT2T1g","30|1995|50|eig|with":"1pEiaC4JXp2IG2eqLJFW6SsRP-kPujnKk","30|1995|50|conn|with":"1N_mz0_CelTZTKeNROVR_biLnDxFU8O1L","30|1995|75|eig|with":"1fl__cGyrcI4po16_eXjLDqlUXFJSJbEC","30|1995|80|eig|with":"1-zRurwF8d1WZusOBf1Fsz0ZjqiJH8973","30|1995|75|wid|with":"1EJyQiPH_l1t4s4qRf1qooOZCQ_5nalH-","30|1995|80|wid|with":"1VI4zeTHbjr7egugqalKx7cyEW61yAAw8","30|1995|80|conn|with":"11dYMlhHSwcWOEbsvqYhqv6ZcM6g_alRV","30|1995|85|eig|with":"14fdvr2jpMABSmP05TjrDFSj7pLb2kIWh","30|1995|85|wid|with":"10qAEN0PS5bWJVafxqsc8eHQIVDSvrHlG","30|1995|85|conn|with":"1bulWuQqRAPuDgx4ZLXnGQ1Tc8XWOoRB-","30|1995|75|conn|with":"1MRTIytn66y7x3IPXfNTRuJnquuWpkI04","30|1995|90|conn|with":"1QJXW2yza3JeIJD0Sf0f5CT1JoVX0tQY3","5|1996|85|wid|no":"1i0uepriJpB7CARfWiN9b2dEZzmG0kL-P","5|1996|95|conn|no":"1yrWRFrwol-vnyaqjkvcGn14zqDpR3qBV","5|1996|85|conn|no":"16qqPsC7w-BQkzjsVcDnUtMN1bIRFM9mQ","5|1996|90|eig|no":"1xskJ2GU0D8T8-_I8nYVx-gxbtyYJY6b5","5|1996|90|wid|no":"1SrB32ex4lTBOuY7GOMUnQOhb5BF_KhHG","5|1996|95|wid|no":"1maq8qiVDpwxQt5-sFXYZB2FP2yANx-Kp","5|1996|80|wid|no":"1RMszv2p5NOxTTsBn1tfYpMumkx5b4dwb","5|1996|90|conn|no":"16wzH4wCcGrVRJrk9eQs_sVswiopq2XiA","5|1996|95|eig|no":"12H8EKl7yEWwgV4Xz1PAilGsAy5csIQ4E","5|1996|85|eig|no":"1zKsbiKsT27U_wL3_kNx8-H5aSDdkI84s","5|1996|75|eig|no":"12uLD9MMVQj8qq-pzEUVPoqJLCs2d8xtQ","5|1996|50|wid|no":"1JW6iDtaYfqiY2SKHq9p_RpLU_emFyx6Y","5|1996|25|conn|no":"1oGQrX84L7hmfSF4ByCO2AgJl0IDGZGPD","5|1996|25|eig|no":"17S7hsKubNg-MaumKnPVuK4LUybszdQLy","5|1996|50|conn|no":"16ou605ZuHtPK8EcCoOby00M-NBBcwDtg","5|1996|75|wid|no":"1sSQY3Q5aNIl2qS8ST68wBzotCvQLQgDN","5|1996|50|eig|no":"1Fa_yl-v4w47ocuwcnP--NTGI4RrHWu0W","5|1996|75|conn|no":"1VnmHNZOR_24fYZshcn2I8E20H1-Q4kLD","5|1996|25|wid|no":"1qD2kvMS0tv51lzUN2LtjDvWLlNbB4TCC","5|1996|80|eig|no":"1qVpJdfrO7zbRZzAyKLcBsoCdkWjvQiD7","5|1996|80|conn|no":"1rm7Uy9Ez_ef87g7vLCqQ_AAtoGlu0EDv","30|1996|90|conn|no":"1UXcsZ9Ym1YB7WuKUgr1VsVCZmTd99fcz","30|1996|95|wid|no":"1bHI8xcONKZL9gSOY0BE0xUVcej7QlqC6","30|1996|95|conn|no":"1VNisCcn90CA1-IEYw4mcGfedAfsdxvoa","30|1996|90|wid|no":"1k8nW9Or_kzYUi4myH02yAtFp97QqLWD9","30|1996|95|eig|no":"1E0eqQaAOwJVOkv6DIEiLEMSjcRc4CsXL","30|1996|25|conn|no":"1FUvd7Su9smy0VpQFEfnSInwXV615kRHy","30|1996|25|wid|no":"1uAjDA2g90nSlBH2FdoagaMMhnxRwF_7i","30|1996|25|eig|no":"11ppVDUnGPtkP46kS2psxprC04wR4GQfG","30|1996|85|wid|no":"1lVi-7kDmQ33oSteIBAE8xkf4hA7-kGy2","30|1996|50|conn|no":"1xtRJPPZWLaxreaP6QVxbJzEH1Vm3z0GK","30|1996|50|wid|no":"1iFIos-okBz_meQl10yvmoJ56yKxKBP-K","30|1996|50|eig|no":"1R-lH5vGQvkgBb74s5mZrm-Xjf4dpcLu8","30|1996|80|eig|no":"17OEqSkqXFGhXwVMiSnLdVt2R-pp1ko_z","30|1996|75|eig|no":"1kPQG6CVs01wG2lacTEeGeDGGo_mvhbsu","30|1996|85|conn|no":"17Ed4VdylfCVsHEvXcLTHLosYv0UsTqoi","30|1996|80|wid|no":"1ySgvbuMhiQW_O86r-oykfGGQNbKg6p-l","30|1996|80|conn|no":"1dDaYhqCn0mSpGVL-UeZ9TD-UvpYwupZ2","30|1996|85|eig|no":"1jESDpfgYSAKUseKoEtrqa462eZ_qIEJS","30|1996|75|wid|no":"1dU1G-E0ifeo8vHIHa47YTqzKj3bgPL2Z","30|1996|75|conn|no":"1O5SvTbFkrwYUL3E-ML9vysKcJPHdxgKy","30|1996|90|eig|no":"1w7hQnqC2_FyTYrFm3sjDRvLrIk0gtGlj","5|1996|95|eig|with":"1bPr8e3MszLSzJ5coGalqp3B4Pf1aZhnh","5|1996|90|wid|with":"1lKvom4btK4C8oNZHaob-WNphzXquQsOU","5|1996|95|wid|with":"14h3dj1whS4__eJwrd1CLUj_sp4gOpgW0","5|1996|95|conn|with":"1OZbSd3x8SFi2lplPxGrHdj-jAhjyhwgc","5|1996|80|wid|with":"1hSEar2Px1smpYxKH6GzXn68JUb-dvr0w","5|1996|90|conn|with":"1gSo9FwH2wOeKpGqw7jpXHlKJGJ9JKa45","5|1996|80|conn|with":"1-P4NS_FER_ccsa0v8-tAsM4cGP0wuH8P","5|1996|85|eig|with":"1--zSGb5Gd2y0jHV7OCP8Lwus4MUO1jCM","5|1996|80|eig|with":"1scqrP3zLmtT5oqihFUsQ-XeMIB1fMgRA","5|1996|85|wid|with":"1w8AU28er2pYu1B-qzkRPUxuYrWDnI1yp","5|1996|85|conn|with":"1u6UnZ2qB-Y_bfbnnbLUmKMtn8iTnjbMZ","5|1996|90|eig|with":"16Ogv0syHxvmeOcFfXEXMvKFnBqEYiRpY","30|1996|75|wid|with":"13urq2Ik9MdIlvo-YVq92oSnBMCyZfeAa","30|1996|90|conn|with":"1B32qYy6kmkK7WniDX92UNniV-7-RmAn6","30|1996|90|eig|with":"1-HBvsPsQLXXOTZq2L1PyIMc3lD5YgeD-","30|1996|80|conn|with":"1sEHhqhX9z7ClBpKtSHPqkcRgZ7ASnfY3","30|1996|75|eig|with":"1jfe3a4mjyxtD1-wZw2I0Pgoy7kJNXsms","30|1996|85|wid|with":"180WMqm-F7hf9WptrIrPilMa9fNhZBi37","30|1996|80|eig|with":"15aqq2CSABranv0QhE7hO_9WweX1YubBv","30|1996|85|eig|with":"1u9bGP1r3RFPIBTBgIS8yiX3RHhtTMGfd","30|1996|80|wid|with":"1Dsrs75FrxGUgW2B0KObLJC5jDxdKGcap","30|1996|75|conn|with":"16IRIUD3PvQNaXptPdQaXwq9RoB1PVwHx","30|1996|90|wid|with":"1dLSF8V2kA462BkyY7ibX9a1RpPvhrwv6","30|1996|85|conn|with":"19psWz-1fQxG14tcjYJY6tV4LDusZEmKL","30|1996|95|eig|with":"1ohSdD_yD0Cve-MeXKm6gTfwJjctSvuWj","30|1996|95|wid|with":"1pq7hDFwknoLLL5lM-zpHloZyuY-Qcbd5","30|1996|95|conn|with":"1QtfzIpnLyw_VokGk33bWIQYfb7D5pZL5","30|1996|50|eig|with":"1PUYEiGGHw4efptSDeU0m4YkXSLWg361q","30|1996|25|conn|with":"1HdWJ3xV2P0SwA6nGOFHRLEG2_ujee-JK","30|1996|25|wid|with":"1cIRl3uP38v5dmRikNSXJ06fn306bJXpX","30|1996|50|conn|with":"15_QvHSCuHVYZ6D5dr4gGGrewP9p8vJb2","30|1996|25|eig|with":"1FN-l92lXsyabFLTNZfw__eEOiGxuTYlL","30|1996|50|wid|with":"1WWhF23iUiG-l8eKDUi_LJDbkzw5SiBAK","5|1995|25|eig|with":"1NJ7S3FTrmGANoEkkcL5WS7JNhP-kLhXD","5|1995|25|conn|with":"16r9Nr6TZshhA1RDkh4yavereau-dSRbu","5|1995|50|eig|with":"1gJKnEH80ifbCji5VjlXxgUHBSGc5JaSM","5|1995|25|wid|with":"1_qc4U4TOhsQmsRzIuAHdgdsS6gM4AmA6","5|1995|50|wid|with":"11XOSc2O7tzJ7wdnYaNiQYs_rjCfADkTT","5|1995|50|conn|with":"1QGunXxTD5AoBTuvd5jijiYrTqYKJHvRd","5|1995|75|conn|with":"1pdDNVRhkEmw_oTIktI9k_qgPuLASYKaQ","5|1995|75|wid|with":"1vwKeFsEEMIm1Hbbm6w2xqvxV0HF0UoUw","5|1995|75|eig|with":"1guwgXhQwwRAuaCerQPh3JgKnbFX9EbUx","5|1996|50|wid|with":"1QaKCCg4vVaQ0lO1A0mgRl_y7hwarpTVT","5|1996|25|eig|with":"1rV4lpnk5zAzgHyubCEicGveV-8AUZeZf","5|1996|75|conn|with":"1WkmThrscmE70EZtqxf2G7BCR5rkdlu1J","5|1996|50|eig|with":"10pHMOiaSR-fNOPj_tZ1ggtHJX9lrlsef","5|1996|25|wid|with":"1wa6NdwPVR1_YPHeGTXxdI8NAh0jeQPWx","5|1996|25|conn|with":"117ZE6S_gKbuJrsrR0hyLgzeLA-4rtFQK","5|1996|50|conn|with":"1oGsivl6r6qm8qJhoAGqgV6B_CCrvsVPF","5|1996|75|eig|with":"17Ok_EeLV74Zleu_6s2qvNK87b9QkUmBx","5|1996|75|wid|with":"1UbYed6rcNl-a57TfTn0JkMMonm5vP3WI"};
-const FILE_VIEW = id => `https://drive.google.com/file/d/${id}/view`;
-const FILE_EMBED = id => `https://drive.google.com/file/d/${id}/preview`;
+const MANIFEST = {"harbor|30|1993|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_AlphaCentrality_NoBadPolys.pdf","id":"1RmBPK1VBiOj8L22eOOfc_-QbxtBS7Wks"},"harbor|30|1993|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_NoBadPolys.pdf","id":"1F60wXkxGpqLc2CyOisUi4rfU-lhUAnRK"},"harbor|30|1993|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_EigCent_NoBadPolys.pdf","id":"1b8koWPS8utlJXZ93KrVnMC2geMTVcYlv"},"harbor|30|1993|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_PageRank_NoBadPolys.pdf","id":"13K0JvudmCyotWQjcYHghaASv15xZnNR-"},"harbor|30|1993|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightInDeg_NoBadPolys.pdf","id":"18LiEkDlJ8M_kuZLFYXhHWL8PwBP-QLln"},"harbor|30|1993|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightOutDeg_NoBadPolys.pdf","id":"17WsD_6IuPlmZx--0ZFuHOKIiQBqzqm4X"},"harbor|30|1993|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_AlphaCentrality_NoBadPolys.pdf","id":"1QIaUIHEBCLsaRb-bVmmuYG_p6OktxLZB"},"harbor|30|1993|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_NoBadPolys.pdf","id":"1YHjqcE1sf_2XczY61wpUOO-XWBS_P7oX"},"harbor|30|1993|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_EigCent_NoBadPolys.pdf","id":"1RQXR1yntaTzxxt3d5H6BBjjY-2bIAJaf"},"harbor|30|1993|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_PageRank_NoBadPolys.pdf","id":"1i_6H4SFoSt1vM6D2mjZe-4EynRTdlCF5"},"harbor|30|1993|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightInDeg_NoBadPolys.pdf","id":"14WApyxYbf7eXSHZh8JKdqY2Kxcs4Dkfi"},"harbor|30|1993|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightOutDeg_NoBadPolys.pdf","id":"1ONs5nu9kQHoS34Feqg8SdEZlSpiSNK05"},"harbor|30|1993|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_AlphaCentrality_NoBadPolys.pdf","id":"18N9Yd6dtmjSpKxwg-sJtOv21eNJPN5aY"},"harbor|30|1993|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_NoBadPolys.pdf","id":"12vzWvjKBf6wcQUUMs9118gdFW_SVsDCt"},"harbor|30|1993|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_EigCent_NoBadPolys.pdf","id":"15H-3Kzjk68SVyz1dxaMG4r2FY2kS1RCC"},"harbor|30|1993|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_PageRank_NoBadPolys.pdf","id":"1LPVP5QdYezVExJCUikm4Xn99rRCaU9tL"},"harbor|30|1993|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightInDeg_NoBadPolys.pdf","id":"1AJ5q2VwJuD1OIfrhE2W6XDUbUVs0USlm"},"harbor|30|1993|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightOutDeg_NoBadPolys.pdf","id":"1PvvHHSokYgobWCmYr-GuJ2Hys4EbAPS6"},"harbor|30|1993|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_AlphaCentrality_NoBadPolys.pdf","id":"1EHFFVmOn1wTFbv3gWra2vwLeVFK4OA0S"},"harbor|30|1993|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_NoBadPolys.pdf","id":"1Qbe1Urpx7OuOtpGaX_1j2cgzlLi3whpP"},"harbor|30|1993|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_EigCent_NoBadPolys.pdf","id":"1H2zEhDodxLHRlYticAaHHnTyRE67nOby"},"harbor|30|1993|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_PageRank_NoBadPolys.pdf","id":"1Ql9G8XFVWO6cWH7dyzVLYDvW8I5-2nec"},"harbor|30|1993|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightInDeg_NoBadPolys.pdf","id":"15irGR8Wl0QG6OmCMeXj7IlYaSzUFH1cq"},"harbor|30|1993|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightOutDeg_NoBadPolys.pdf","id":"1vLKl4IGA_OPDgaZjGs6nFuxONg_TPmtC"},"harbor|30|1993|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_AlphaCentrality_NoBadPolys.pdf","id":"1fi_QuSNr7_iZiNY5boOTCmKCoV8fupgN"},"harbor|30|1993|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_NoBadPolys.pdf","id":"1PNUOFX2e0KBeaPy7iqyOQ2zcEAe9rm0g"},"harbor|30|1993|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_EigCent_NoBadPolys.pdf","id":"1-9r6F6x_lMFoPVNF2h-0xyn-vMfm8G2h"},"harbor|30|1993|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_PageRank_NoBadPolys.pdf","id":"1adLxUEuQUVLxsUqllG2fuVAF3V7rnOER"},"harbor|30|1993|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightInDeg_NoBadPolys.pdf","id":"1epkQrRcRydcJq4cU2AjAIFahG-E2q7iz"},"harbor|30|1993|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightOutDeg_NoBadPolys.pdf","id":"1HQVRT2bmpMFo5Anzt2Sgy_D9cDz6Yv_G"},"harbor|30|1993|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_AlphaCentrality_NoBadPolys.pdf","id":"1RVvGK3fdNAjKlP8GFb3kuJ_GoGa4nwoF"},"harbor|30|1993|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_NoBadPolys.pdf","id":"1MUFRSa_vxrznQvrjw2dGtypwyblU48Nn"},"harbor|30|1993|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_EigCent_NoBadPolys.pdf","id":"16JbwURFDp88gNbp_Z5up3mDegxS4a-wx"},"harbor|30|1993|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_PageRank_NoBadPolys.pdf","id":"1GqlpsnVDbDXDjq3TMHIzlBbVmjVJHdNo"},"harbor|30|1993|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightInDeg_NoBadPolys.pdf","id":"1sPZJ6LvhlDZpnpa6OikNwO1jt_Imn95x"},"harbor|30|1993|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightOutDeg_NoBadPolys.pdf","id":"1Ixm7CyCALoGmLf7Q3Rgdxvu9nZwQNlGL"},"harbor|30|1993|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_AlphaCentrality_NoBadPolys.pdf","id":"1LF06A0GUg4IgQwNuQ9vcoyGk4BJKrhgi"},"harbor|30|1993|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_NoBadPolys.pdf","id":"1Sc3EDAn9-IiHvQpETFrgQLeHQG_yS1BG"},"harbor|30|1993|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_EigCent_NoBadPolys.pdf","id":"1D3jbg1H_MOvdQHBJeviEsn8EJo9EIysX"},"harbor|30|1993|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_PageRank_NoBadPolys.pdf","id":"1DA5e5i4whP8LLo-5CWSsArpuueCF2H9j"},"harbor|30|1993|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightInDeg_NoBadPolys.pdf","id":"135OvdFfmoN_VqBAlUG21QsRKuoek4otn"},"harbor|30|1993|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightOutDeg_NoBadPolys.pdf","id":"1r4VZ5r6bxtP8q68eNmdNoaZ-PJpEHm3p"},"harbor|30|1995|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_AlphaCentrality_NoBadPolys.pdf","id":"1QyQxOmtm3tkqneui0K1OvACgy-v3Yk5j"},"harbor|30|1995|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_NoBadPolys.pdf","id":"18Pzv7s17YqsCARPWneCKyaOv8hNxkuld"},"harbor|30|1995|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_EigCent_NoBadPolys.pdf","id":"1OFXLYhKeWc7XvlZRav4a-ayeXYEazvmW"},"harbor|30|1995|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_PageRank_NoBadPolys.pdf","id":"15t2LkYpacRL8U0NVztut9RjkCKtUrPGQ"},"harbor|30|1995|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightInDeg_NoBadPolys.pdf","id":"14n9HS6EOtBJziR7Yg-VyeQxVN2Q5t0cS"},"harbor|30|1995|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightOutDeg_NoBadPolys.pdf","id":"1hTQ9q210PqihS69Vn0ongHEu34s90oee"},"harbor|30|1995|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_AlphaCentrality_NoBadPolys.pdf","id":"1dBRul9y8kmPKc1YO9p-5BTbRMwaTSbPl"},"harbor|30|1995|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_NoBadPolys.pdf","id":"1rgdXlpRxRNswtAJFyckbAeLrCnfaeBcW"},"harbor|30|1995|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_EigCent_NoBadPolys.pdf","id":"1fZUagol_crMLoVXGvgjXss4jM-8p2lMe"},"harbor|30|1995|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_PageRank_NoBadPolys.pdf","id":"1mGy3gDdToJOH4wEqeqWiO7sHEor5Wu0F"},"harbor|30|1995|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightInDeg_NoBadPolys.pdf","id":"1Gn77isrY758eLBfbFvVDq8Hqidd2imu6"},"harbor|30|1995|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightOutDeg_NoBadPolys.pdf","id":"11dFECO1d7yBYDTxDwnkSXrNbJt9hJnho"},"harbor|30|1995|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_AlphaCentrality_NoBadPolys.pdf","id":"1H5-0VVFbl6_J0IKhA3WIWw4fksxpFp5E"},"harbor|30|1995|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_NoBadPolys.pdf","id":"1Sucs2u9rv_Tj20_ErGqJBP4Y_G7p7SzS"},"harbor|30|1995|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_EigCent_NoBadPolys.pdf","id":"16v82H9EFrIY45Qr0iHMJE6dMYNPFoI-i"},"harbor|30|1995|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_PageRank_NoBadPolys.pdf","id":"1IB0dwl_LN4D73BUFpnGMAQ-tonZ0Fg08"},"harbor|30|1995|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightInDeg_NoBadPolys.pdf","id":"1539sWYByGxWj0H_OkwPBHADgnHP2tftj"},"harbor|30|1995|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightOutDeg_NoBadPolys.pdf","id":"1_dPMNHywOx1nky0hnUFM2cnVlKoxrJ0v"},"harbor|30|1995|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_AlphaCentrality_NoBadPolys.pdf","id":"1pjMF81oa7aTocbzDedsgpQG5FNFN4bVE"},"harbor|30|1995|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_NoBadPolys.pdf","id":"1Y_zWhp2HD3MC879pvr4MyzLiA4Z3RCPT"},"harbor|30|1995|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_EigCent_NoBadPolys.pdf","id":"1Y_iaEo55J_zXKvkPHedItjV3RGXyaNoA"},"harbor|30|1995|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_PageRank_NoBadPolys.pdf","id":"1Xcsdq8wtbKE4U39BLeJsJ2YHiTJMjQMq"},"harbor|30|1995|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightInDeg_NoBadPolys.pdf","id":"1BXUBEY-CwDdNJF88zfcL6zD4s2MMp2yA"},"harbor|30|1995|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightOutDeg_NoBadPolys.pdf","id":"1Nk7cqCigfYuBeTRI2M4VfYAvwac05quL"},"harbor|30|1995|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_AlphaCentrality_NoBadPolys.pdf","id":"123jN3f5XZImMyUsSqFZwR7v5Dt9erqLq"},"harbor|30|1995|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_NoBadPolys.pdf","id":"1eimWhFSqbNU4PceJ86nX2_4mDCHmq7Va"},"harbor|30|1995|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_EigCent_NoBadPolys.pdf","id":"1Y6rQuZqec2CoewBSGvAFw9pWJWEoQz6o"},"harbor|30|1995|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_PageRank_NoBadPolys.pdf","id":"1ImhFoGiea8UOKGNEzx-lVw7WKj_WfRy_"},"harbor|30|1995|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightInDeg_NoBadPolys.pdf","id":"1i-hwqxIbKZGWcB5JA1mPK8gmgr4PaNXh"},"harbor|30|1995|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightOutDeg_NoBadPolys.pdf","id":"1HrMwrp9IsaIJZpMZw9hfvZufeldFradZ"},"harbor|30|1995|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_AlphaCentrality_NoBadPolys.pdf","id":"16Fk9uA8jUkFlVL9V1c9J_DKzybHx5oBy"},"harbor|30|1995|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_NoBadPolys.pdf","id":"1iY-lYLPBUTRyOsssHdkAiURVTiLbLuL9"},"harbor|30|1995|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_EigCent_NoBadPolys.pdf","id":"1QkChidlJ5d2Znbc0BXzA9jRWq8cQ6tLU"},"harbor|30|1995|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_PageRank_NoBadPolys.pdf","id":"1x8UZItMJx_VT0mcxOyCskMRC1gc1hThG"},"harbor|30|1995|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightInDeg_NoBadPolys.pdf","id":"14MufwEcy9hom_FsQFWoWxl-zb5TBY7YC"},"harbor|30|1995|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightOutDeg_NoBadPolys.pdf","id":"1wIVjGA4pyoLq_H18AiAdI6phpO4i-rrd"},"harbor|30|1995|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_AlphaCentrality_NoBadPolys.pdf","id":"1X6KyDClvjqZEDrLFCQJUiHZYPt7WvDjb"},"harbor|30|1995|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_NoBadPolys.pdf","id":"1ygmQW5tXaZFKpP4CPcTeTOAdkXkgRgie"},"harbor|30|1995|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_EigCent_NoBadPolys.pdf","id":"15mCwFFiCyCEtjpVZvsOTSKHuAzVPmu5r"},"harbor|30|1995|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_PageRank_NoBadPolys.pdf","id":"1mUOONrv9tc3DRglfP5I1LMiX7TWM9-P0"},"harbor|30|1995|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightInDeg_NoBadPolys.pdf","id":"1FAIfvAvg9WDik4PSSzzKZ6_ZGS210T5R"},"harbor|30|1995|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightOutDeg_NoBadPolys.pdf","id":"1xDwY6V-GFaO1AM4o6NiX_lAe9NQ2sgTj"},"harbor|30|1996|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_AlphaCentrality_NoBadPolys.pdf","id":"1yxG6G0K_pBtyXyKtgiWGeGaaBXMlSFTk"},"harbor|30|1996|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_NoBadPolys.pdf","id":"1syOX_9cx-XlaTtcvslmPlJnNdKmvOtzG"},"harbor|30|1996|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_EigCent_NoBadPolys.pdf","id":"1yhh_pAAXMy9_zY30PH0rKArzX_z42Srs"},"harbor|30|1996|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_PageRank_NoBadPolys.pdf","id":"11iv8jgL2W5UOgTiHBol34N6ST9whjlrj"},"harbor|30|1996|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_WeightInDeg_NoBadPolys.pdf","id":"1dgd5__kuk5Kha6cnfRRWDpUgP__t8VhO"},"harbor|30|1996|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_WeightOutDeg_NoBadPolys.pdf","id":"1F8Pes1dfTk0cywa3T-5L6eu0G50W-t31"},"harbor|30|1996|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_AlphaCentrality_NoBadPolys.pdf","id":"1JDd0L9Wq9US0aVf-XBjdvJdW887rRHcq"},"harbor|30|1996|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_NoBadPolys.pdf","id":"1rSo0--obwdPFHy9rxudS5crRFLMy4jD_"},"harbor|30|1996|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_EigCent_NoBadPolys.pdf","id":"1d0dCP72YlWkZDQKDPfyK97y9fUSjexvk"},"harbor|30|1996|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_PageRank_NoBadPolys.pdf","id":"1zghFTprPdfeD3T-jz0LlKDeEhWwRboTQ"},"harbor|30|1996|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_WeightInDeg_NoBadPolys.pdf","id":"11zTsiHSaj_q7JxbMLh1dthHz3galq9pn"},"harbor|30|1996|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_WeightOutDeg_NoBadPolys.pdf","id":"1fv6aiMkAoTevEqormQkmBqdAD-L6oM9n"},"harbor|30|1996|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_AlphaCentrality_NoBadPolys.pdf","id":"18fLCve-X-q2vEmoNLdrFtxSfYzJMSKsX"},"harbor|30|1996|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_NoBadPolys.pdf","id":"1VoMMPerifMyRJQkyjbRItDsxdeb80Ua1"},"harbor|30|1996|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_EigCent_NoBadPolys.pdf","id":"1KokxmNYU7NvjV5Bd5XwiUiH7ZESp6ktT"},"harbor|30|1996|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_PageRank_NoBadPolys.pdf","id":"1ZiNZ_SXekPPR6wg1sSGDKRBtABac6emS"},"harbor|30|1996|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_WeightInDeg_NoBadPolys.pdf","id":"1wd3n1SLvQf50qWjGcvtzTOvS15Ynzw6U"},"harbor|30|1996|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_WeightOutDeg_NoBadPolys.pdf","id":"1VbjBlLGni-SfGdo_UV1ENXml99hADmcA"},"harbor|30|1996|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_AlphaCentrality_NoBadPolys.pdf","id":"1Gft5EzgnHBF7RQ5Y6O2a2T2XMjthOJU5"},"harbor|30|1996|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_NoBadPolys.pdf","id":"1_hii8uErZOLtJXAyaIpjN9X68dhXg02L"},"harbor|30|1996|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_EigCent_NoBadPolys.pdf","id":"11Rp5kMaY1nwy0xmA3-K_nRc6GiTVyhRJ"},"harbor|30|1996|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_PageRank_NoBadPolys.pdf","id":"1i9XVuSgbwRCtZBEf9ELWW2p4lyUg57Gc"},"harbor|30|1996|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_WeightInDeg_NoBadPolys.pdf","id":"1qisWL2Dobcm-N8yADmbwMVKnJJi9YbA4"},"harbor|30|1996|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_WeightOutDeg_NoBadPolys.pdf","id":"1DIRfBmshWyCakuzjlxk4C3FPF7Acz-pR"},"harbor|30|1996|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_AlphaCentrality_NoBadPolys.pdf","id":"1YOA5w8iuFCCEJoUa2TC_kFH8jUW2UWme"},"harbor|30|1996|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_NoBadPolys.pdf","id":"1w0fCgpccuAnoRKOevjUs2zZRVVjfRZ8v"},"harbor|30|1996|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_EigCent_NoBadPolys.pdf","id":"1zgEXrA52N-baENEzf3k4CMZAmSg0Q-uN"},"harbor|30|1996|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_PageRank_NoBadPolys.pdf","id":"1mERzb0A_AeA9bXkC-Lbn8Z8-EvqjFgik"},"harbor|30|1996|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_WeightInDeg_NoBadPolys.pdf","id":"1zYPVlwLEh9AI91seaovd_MFKOoE7-74E"},"harbor|30|1996|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_WeightOutDeg_NoBadPolys.pdf","id":"1JioLmuHTOeScCTUqZNSD6NgCmIqvDMji"},"harbor|30|1996|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_AlphaCentrality_NoBadPolys.pdf","id":"1HalsOHsU8ED0-no-z9eump77-jS5uaDq"},"harbor|30|1996|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_NoBadPolys.pdf","id":"1LVObW03YkldomHd2Sl8EMXI_MypuM8MW"},"harbor|30|1996|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_EigCent_NoBadPolys.pdf","id":"1SJ4XK0N2MuJNsGtwxg0hWVA0FPhi76xR"},"harbor|30|1996|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_PageRank_NoBadPolys.pdf","id":"1ZRP7qhcC47BIRqsCYVa26haosG6AxZS_"},"harbor|30|1996|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_WeightInDeg_NoBadPolys.pdf","id":"10fKtFI_N-no4Wfcmxt8e_gAmjtw6RoTX"},"harbor|30|1996|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_WeightOutDeg_NoBadPolys.pdf","id":"1z3ezeerSDpyHkS8FMFtirayyW6cO0ZZk"},"harbor|30|1996|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_AlphaCentrality_NoBadPolys.pdf","id":"1OsWoCjWMY0RV_BLUmPtGH320se19SjyV"},"harbor|30|1996|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_NoBadPolys.pdf","id":"1JF7nvNbpmzO8AlYh8Jg-wBbbbhwinv3u"},"harbor|30|1996|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_EigCent_NoBadPolys.pdf","id":"1EGNczclwxG9-LKnt0hw1zpTtUcBSAe4u"},"harbor|30|1996|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_PageRank_NoBadPolys.pdf","id":"1vvfvONwtJ8_jHWc3tbAxmeEjtmeZc_7e"},"harbor|30|1996|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_WeightInDeg_NoBadPolys.pdf","id":"18JwtxU1ZmmxJCaLCq1Pv3ErQX1XTGKLY"},"harbor|30|1996|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_WeightOutDeg_NoBadPolys.pdf","id":"10O3JJGpgBj4ucJYAUV3Sb77_lN88VWZ8"},"jbay|30|1993|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_NoLIS.pdf","id":"1VILtcDy5huADRHT1OmAB3VaJI5UFE_Uq"},"jbay|30|1993|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_EigCent_NoLIS.pdf","id":"15MGGX_dEzq-Q6RkbK0MZ5MlBO4AMsU1U"},"jbay|30|1993|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_Page Rank_NoLIS.pdf","id":"1aPbMQaiHjis5m_ngexog7jJPWM1uT-Vg"},"jbay|30|1993|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightInDeg_NoLIS.pdf","id":"1W_R0AP9C4scsk2SY2-x0stQQP7aqwJ6G"},"jbay|30|1993|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightOutDeg_NoLIS.pdf","id":"1nwJXKDQL6Xi-tVynStwjUXHASvF7x57S"},"jbay|30|1993|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_Alpha Centrality_NoLIS.pdf","id":"12MYVlkCqK1vs8mtH6xWG2JLotMmCZfUy"},"jbay|30|1993|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_NoLIS.pdf","id":"1emrkDHuY8AVLy4QTtgi1Pno-eG0UoYiv"},"jbay|30|1993|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_EigCent_NoLIS.pdf","id":"1a3JmVCSINsfnS202OGcKM7Wph-4n-6m4"},"jbay|30|1993|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_Page Rank_NoLIS.pdf","id":"1ZM-wtt8leRpcFM8J9Mz07aYtu0Ho6Jpl"},"jbay|30|1993|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightInDeg_NoLIS.pdf","id":"1jYyB29rvFA888zhnHLHOA6A4TFd85mkj"},"jbay|30|1993|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightOutDeg_NoLIS.pdf","id":"1ZW_ioTFF7vs3q0vTIXhy_dKAQuLQNobe"},"jbay|30|1993|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_Alpha Centrality_NoLIS.pdf","id":"115JvaeXp8gq7c9ZEBc-9nFBlImVvUbBj"},"jbay|30|1993|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_NoLIS.pdf","id":"1Q9m7WMDlVCp3Yg0WYC50J9iTy93zt0gd"},"jbay|30|1993|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_EigCent_NoLIS.pdf","id":"14Ndb-MKNEjkr02x4sKkLNf2-oooKX4w1"},"jbay|30|1993|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_Page Rank_NoLIS.pdf","id":"1nYHXJoSCAkmmZhGbVAMIvC7ZYvCa4Nbn"},"jbay|30|1993|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightInDeg_NoLIS.pdf","id":"1w5NfDQxZeqkWO-yIuvqB49PQwR54MRJC"},"jbay|30|1993|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightOutDeg_NoLIS.pdf","id":"1aWtKMc9xilVSOR4DfhzItkm8S4I7PehI"},"jbay|30|1993|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_Alpha Centrality_NoLIS.pdf","id":"141hVtN193NYNeXXHqfL6QQCJyDcOZtp9"},"jbay|30|1993|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_NoLIS.pdf","id":"1feyIV-enXTfsO9yMmQDVJakGjWXdONeB"},"jbay|30|1993|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_EigCent_NoLIS.pdf","id":"1ZoSYmtgB5VkaqAXsOCq9jOlGG7Saawoh"},"jbay|30|1993|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_Page Rank_NoLIS.pdf","id":"1ziLP9LI2r5Ek8nlm5yWdDNKhJmzE3EjQ"},"jbay|30|1993|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightInDeg_NoLIS.pdf","id":"1asY3_5y_tzYIKyinMsMn6TytoMv7qICG"},"jbay|30|1993|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightOutDeg_NoLIS.pdf","id":"1C71BaGZeQU3y8HRKVC6X7CO52dbMuN3j"},"jbay|30|1993|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_Alpha Centrality_NoLIS.pdf","id":"137-Q7nMWPigJNcS3gtwPmEyjWYiG4R7r"},"jbay|30|1993|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_NoLIS.pdf","id":"1Ie0VI7p4EhLjCBGouicDlfdAt4d_E6RS"},"jbay|30|1993|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_EigCent_NoLIS.pdf","id":"1x573_L8psAL5z7H_BVsl2SyNPw12J-9j"},"jbay|30|1993|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_Page Rank_NoLIS.pdf","id":"1MfBWgsqIihX7amf2ckl_jib6z7bVhpPX"},"jbay|30|1993|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightInDeg_NoLIS.pdf","id":"1N0Cr_GY6CMDIzrcxSl2ou0Brbl2BmYKi"},"jbay|30|1993|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightOutDeg_NoLIS.pdf","id":"1mR701BN-CI09NNcMS6g-xZugZ3lgc7cC"},"jbay|30|1993|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_Alpha Centrality_NoLIS.pdf","id":"1ohmIb8-S5jKoJQ83TydsKcwcyV15xEKm"},"jbay|30|1993|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_NoLIS.pdf","id":"1ZJQM8gpBQxv0VMqRPS1J6bkr57ey_U0n"},"jbay|30|1993|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_EigCent_NoLIS.pdf","id":"12FaVCutB5qRMrRNJ1G0rk7TENiyq1r_A"},"jbay|30|1993|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_Page Rank_NoLIS.pdf","id":"1EU4mphR9uCIwsKVAUbXur6adgE0VYTZ2"},"jbay|30|1993|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightInDeg_NoLIS.pdf","id":"1_fwW7bMugLYgNNjtnATitvo7ZetUw978"},"jbay|30|1993|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightOutDeg_NoLIS.pdf","id":"1d8J4uayfIYqvmhNjwOfBVq_HacEoTD1g"},"jbay|30|1993|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_Alpha Centrality_NoLIS.pdf","id":"1Wcrcxgk5lD1pIB0tuOmjiYKyCUe2686n"},"jbay|30|1993|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_NoLIS.pdf","id":"1WdqChA9XneKZs1YqC65ZS80aspwR7sdc"},"jbay|30|1993|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_EigCent_NoLIS.pdf","id":"1R5FBqghij2bAyZMs4-9csJvV_4e_18IU"},"jbay|30|1993|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_Page Rank_NoLIS.pdf","id":"1ivqv3W1iDrngG8-UWzAbHYipLSmapq70"},"jbay|30|1993|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightInDeg_NoLIS.pdf","id":"1YcikgE4I7BN8faXgVN3OUkJwBwOsrDGw"},"jbay|30|1993|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightOutDeg_NoLIS.pdf","id":"1VXDC-GlR8VlC5JojDA37n34q9ddL1fUg"},"jbay|30|1995|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_Alpha Centrality_NoLIS.pdf","id":"1W3oBXPK0WGT4W_FdQ7gD23uxws7k-wKY"},"jbay|30|1995|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_NoLIS.pdf","id":"1Z4Sddv-c1ZdUcmqcKRVwGAXjjZ0Kk7GW"},"jbay|30|1995|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_EigCent_NoLIS.pdf","id":"1o2JaZS4YoiWyz1B45c9DgD1f8T_bZ2OT"},"jbay|30|1995|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_Page Rank_NoLIS.pdf","id":"1zD_LRgKMn6HaF4F_hxLqYIkJpA1UOVWf"},"jbay|30|1995|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightInDeg_NoLIS.pdf","id":"10tMfvY5O2EWkoygkrjBE2T4-GNxrceYO"},"jbay|30|1995|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightOutDeg_NoLIS.pdf","id":"1E89rz9aqAZ2nXysAd30mipERzOsJe6ZP"},"jbay|30|1995|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_Alpha Centrality_NoLIS.pdf","id":"1mW3gwwu92U-cFbu-HZIY9PF1WfmkgawV"},"jbay|30|1995|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_NoLIS.pdf","id":"13p0ykbihixpJkQ4-8GHGEnp8GyijgwnJ"},"jbay|30|1995|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_EigCent_NoLIS.pdf","id":"15Atr4szwXb_Ds346KPhGt6MFKTs9qx1o"},"jbay|30|1995|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_Page Rank_NoLIS.pdf","id":"11gC6SjtEkGWvLIsLcl6LsQJvNXGG0pVi"},"jbay|30|1995|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightInDeg_NoLIS.pdf","id":"1g-g6sNJqTuRJoTr1Kj8iEVJxkCKEr0eg"},"jbay|30|1995|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightOutDeg_NoLIS.pdf","id":"1uUmOaBMNzhxX9SpPgqN0MXy25inly269"},"jbay|30|1995|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_Alpha Centrality_NoLIS.pdf","id":"18Duqd_Il31D2szjxS_-PVRwOB4wlWEA3"},"jbay|30|1995|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_NoLIS.pdf","id":"1pRxw6V47MWM7J-lNTqXI7aGYIGXV5Bt4"},"jbay|30|1995|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_EigCent_NoLIS.pdf","id":"1K4YSS_qIG45Ww73bqKw0ef4iGcfPeeMF"},"jbay|30|1995|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_Page Rank_NoLIS.pdf","id":"1EswUdDiagRc_AORBw55hrTAmoTemJhsf"},"jbay|30|1995|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightInDeg_NoLIS.pdf","id":"1ccHeTbMWgMqnC7ku54FAK0DrxnM0c5m4"},"jbay|30|1995|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightOutDeg_NoLIS.pdf","id":"1UxNcie-6wxPxb3fs14Vi9l0qbQgEC7aW"},"jbay|30|1995|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_Alpha Centrality_NoLIS.pdf","id":"1TDqB6zSC7CYW_ALX6LlIqYlqH5_vidMo"},"jbay|30|1995|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_NoLIS.pdf","id":"12GCtMSUGxzaufLwZJpTLYXWQZ6wPT_3w"},"jbay|30|1995|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_EigCent_NoLIS.pdf","id":"1VjI5NzUe51sjPKWkAysmPJab0lGjgoYR"},"jbay|30|1995|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_Page Rank_NoLIS.pdf","id":"12iLRfu6Q1unArb94iDEofOxFBW6qq4mK"},"jbay|30|1995|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightInDeg_NoLIS.pdf","id":"1A33RG7lCEuEjEgOs_uKfpX168JRi6ukg"},"jbay|30|1995|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightOutDeg_NoLIS.pdf","id":"1HVeZRX7MlCMJ94K4vytSbDiEFBpEAaYn"},"jbay|30|1995|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_Alpha Centrality_NoLIS.pdf","id":"1w3NsMieA58GzjXrb3Et4Og8HIOG-pPa9"},"jbay|30|1995|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_NoLIS.pdf","id":"1H1RtIcid_8S71PTK7_nOF3MaRVBx-vEe"},"jbay|30|1995|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_EigCent_NoLIS.pdf","id":"1_87vHTkjYt0XK3FgBcQWdNcp_u1uf_Rd"},"jbay|30|1995|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_Page Rank_NoLIS.pdf","id":"1l9CmixMUiIWW2ZvI3YaVeSMBNtOWP2Tv"},"jbay|30|1995|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightInDeg_NoLIS.pdf","id":"1dawCDJAvD-Or7Ekd0cgXi6gE0ZmgbjW2"},"jbay|30|1995|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightOutDeg_NoLIS.pdf","id":"1g4KSJLpTbbBElDc1bvlBFsVUL2OZJ3bG"},"jbay|30|1995|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_Alpha Centrality_NoLIS.pdf","id":"1GaQZ3kk7kvC1XP8r9UTMg09NmTUdP79U"},"jbay|30|1995|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_NoLIS.pdf","id":"1H817hHqXCdu75vg18GesRS8Y75LWlzPt"},"jbay|30|1995|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_EigCent_NoLIS.pdf","id":"1-MTe16-cx82x5DuVoUlEpVbslHXw3moq"},"jbay|30|1995|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_Page Rank_NoLIS.pdf","id":"12keZ-rmvycDlehtJvDVm0I_VgrG6RoaU"},"jbay|30|1995|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightInDeg_NoLIS.pdf","id":"1qpXeTGJOEBTk2DxDtyP4v2yb9krpFBBa"},"jbay|30|1995|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightOutDeg_NoLIS.pdf","id":"1FVMC3Mi6Lr_FL-NtJxQCY3FeRhtRmupd"},"jbay|30|1995|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_Alpha Centrality_NoLIS.pdf","id":"1y31izGV8-UUkeSS3Oe0s4I6nAR-Sk_uQ"},"jbay|30|1995|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_NoLIS.pdf","id":"1HwQNZDqwjnH33diMWgN3IOhmOqOZg_Uj"},"jbay|30|1995|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_EigCent_NoLIS.pdf","id":"1K4UYXcgfKwDSTHN39i2WnmORkvYphS5U"},"jbay|30|1995|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_Page Rank_NoLIS.pdf","id":"1NMkSSVrPonR3OHxXvfDnwQmx8FLJ7VNV"},"jbay|30|1995|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightInDeg_NoLIS.pdf","id":"1NMXJYYuF-is1U6WLUxOOSnJeTPqKr5Hr"},"jbay|30|1995|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightOutDeg_NoLIS.pdf","id":"1Ah4gKFm1u4VSqQ_R_aZWL2Q6pDmqOuK8"},"jbay|5|1993|25|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_NoLIS.pdf","id":"1Ma9X8fhS8wd5LfBXMjCaGdK4TEbfbnif"},"jbay|5|1993|25|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_EigCent_NoLIS.pdf","id":"1cvx9ns3gQbRH7yd7RrSA3P2FQvCVE_Y7"},"jbay|5|1993|25|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_WeightInDeg_NoLIS.pdf","id":"1sR1CDaaWgYMKELdLf4kh8AIFv-NQufc1"},"jbay|5|1993|25|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_WeightOutDeg_NoLIS.pdf","id":"1cetskHLUjpHs_g8L0mTliVYoKa1NKaw5"},"jbay|5|1993|50|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_NoLIS.pdf","id":"1BZtWsSJrITFO6YMTDdh-bec07EHAK4E5"},"jbay|5|1993|50|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_EigCent_NoLIS.pdf","id":"15jOdNFvSttWeiL-ICmqToomIryUcGf10"},"jbay|5|1993|50|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_WeightInDeg_NoLIS.pdf","id":"1DjwTOaRJhzNYT8dKfgBr3TG_AmsS_hNm"},"jbay|5|1993|50|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_WeightOutDeg_NoLIS.pdf","id":"1VtkHEzghc3kphnmR0vL1hVsCQfYkCViK"},"jbay|5|1993|75|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_NoLIS.pdf","id":"1lVPmfQlNkYR1Uq9Tgy_SJkrZI6PfVKZR"},"jbay|5|1993|75|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_EigCent_NoLIS.pdf","id":"1_Dw4SYT6s1s37EnwerOdvdZnmEJWR1jy"},"jbay|5|1993|75|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_WeightInDeg_NoLIS.pdf","id":"1lsvHxb_Ihn-NPw7TOIqMk20_fTsX_Ghd"},"jbay|5|1993|75|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_WeightOutDeg_NoLIS.pdf","id":"1M1chuPa96pzBB1g7zhypU2Ufe0JjfGq3"},"jbay|5|1993|80|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_NoLIS.pdf","id":"1fapSE2Fao2ZaDzWchxUfdgyvdSokCcW0"},"jbay|5|1993|80|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_EigCent_NoLIS.pdf","id":"1ToasNjUuDKzhJTW3p8ciqZX_JRFrMQoN"},"jbay|5|1993|80|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_WeightInDeg_NoLIS.pdf","id":"1NuXz-royd4wKHVZMK6yWo_Gyl0hXyatE"},"jbay|5|1993|80|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_WeightOutDeg_NoLIS.pdf","id":"1rID6R1A0hlfIP8oT6-aqVLkGQeiXGHUc"},"jbay|5|1993|85|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_NoLIS.pdf","id":"10HaE5C1hR93RIC-dJIJcmv9BPMSD3t_d"},"jbay|5|1993|85|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_EigCent_NoLIS.pdf","id":"1VmgvkYlBoKhdM1Qgm0LRtR_qVLGrbvmq"},"jbay|5|1993|85|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_WeightInDeg_NoLIS.pdf","id":"1Bbt4KhJlu24-nWaW9NKHIDC4gXJeYuLq"},"jbay|5|1993|85|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_WeightOutDeg_NoLIS.pdf","id":"1tPXc3982vodWpuYDqzBAnUgJh-TGGLzS"},"jbay|5|1993|90|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_NoLIS.pdf","id":"16SrI_09TLZB3It97n9-Q7GaXMJ4EIXhN"},"jbay|5|1993|90|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_EigCent_NoLIS.pdf","id":"1UeALxVpO0zL1ZLYiQy6ne1gDFmnmJsgb"},"jbay|5|1993|90|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_WeightInDeg_NoLIS.pdf","id":"1PPgqSOWhR-qAQyFCThBFSj4G9IGHcJ9h"},"jbay|5|1993|90|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_WeightOutDeg_NoLIS.pdf","id":"1wSsnNi-48LVfSJClVVe5qVRBRJnmicuN"},"jbay|5|1993|95|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_NoLIS.pdf","id":"1bp3Ds4VryV-I3QYog9COxwstOgiLYShS"},"jbay|5|1993|95|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_EigCent_NoLIS.pdf","id":"1snQhIsUYTIDronPjqHBNICfPcImON3Gd"},"jbay|5|1993|95|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_WeightInDeg_NoLIS.pdf","id":"1pZOkysoDbugF21iJwmQcKre4Kq46Omis"},"jbay|5|1993|95|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_WeightOutDeg_NoLIS.pdf","id":"1g1Q_HQY1lM9vaumYxTNmjDXkQuTCmV0b"},"jbay|5|1995|25|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_NoLIS.pdf","id":"1hVpabCQTbW4r2Ad8dHDntAiOev9E6A7S"},"jbay|5|1995|25|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_EigCent_NoLIS.pdf","id":"1mmr8l78OL0nwdf-hiMG6ZqcsHPshIg2g"},"jbay|5|1995|25|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_WeightInDeg_NoLIS.pdf","id":"1xp6RzhNfc85K4yJA_sqCCZ2BpFt58oyG"},"jbay|5|1995|25|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_WeightOutDeg_NoLIS.pdf","id":"1TzpYgMqHTuUM119r00S7sN2fGwMQZhXt"},"jbay|5|1995|50|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_NoLIS.pdf","id":"1fLw0zI6sX7THiQL8XfcsBeHiC6at2PgK"},"jbay|5|1995|50|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_EigCent_NoLIS.pdf","id":"1Rm33OM6zdZ9EwRRMWt1yt4dghifDNX8f"},"jbay|5|1995|50|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_WeightInDeg_NoLIS.pdf","id":"17ok-Ba-36LrL0kRj7A1ucEWUHCQKTLZN"},"jbay|5|1995|50|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_WeightOutDeg_NoLIS.pdf","id":"1dM69mhQRh0_jTVhs3dvYgTnLQUqY_gyJ"},"jbay|5|1995|75|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_NoLIS.pdf","id":"1XZ17RIJqYjyKhH76mT2FMxkOvKIkDrkD"},"jbay|5|1995|75|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_EigCent_NoLIS.pdf","id":"1Dm3JSVMNiafqrC1LT2x8boYcASc53oxe"},"jbay|5|1995|75|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_WeightInDeg_NoLIS.pdf","id":"1dD4lRIVIkyMF5VxcB9VFH_8F3Q3mGtl7"},"jbay|5|1995|75|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_WeightOutDeg_NoLIS.pdf","id":"12Pr-dqXSwtuoFdk70fGvj00keNb1DtYV"},"jbay|5|1995|80|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_NoLIS.pdf","id":"1_wdEIxFhYC3JZd4KIuNvLhBBSwsQoOBn"},"jbay|5|1995|80|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_EigCent_NoLIS.pdf","id":"1FerQnq-BFA8SdLEF-9F2SiwQtolcPK38"},"jbay|5|1995|80|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_WeightInDeg_NoLIS.pdf","id":"1sOifEP7fU5IWx0iPVDj4jdhB0so-p3R4"},"jbay|5|1995|80|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_WeightOutDeg_NoLIS.pdf","id":"1y5MyL-E0MBMBQJIkFlks7hPs20awDRHC"},"jbay|5|1995|85|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_NoLIS.pdf","id":"1sqsF4fMUqJnoQzA9SKdcRjtozMQRGli6"},"jbay|5|1995|85|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_EigCent_NoLIS.pdf","id":"1C0VCpDBRUtPu1xxW9JZUzhluOEhr-ycJ"},"jbay|5|1995|85|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_WeightInDeg_NoLIS.pdf","id":"16wud7nG06jqcS55ufwr_tAq5FejPMtJQ"},"jbay|5|1995|85|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_WeightOutDeg_NoLIS.pdf","id":"1SiyODHSlrxBWn1-0mixjY6fFelQfKpVK"},"jbay|5|1995|90|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_NoLIS.pdf","id":"1s0OXzzaUR3rO-PnmhsQN8S9ZCgLXJnli"},"jbay|5|1995|90|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_EigCent_NoLIS.pdf","id":"1LuVDLFxhR5s3BVR1jPLc7bUpw7lSzg0X"},"jbay|5|1995|90|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_WeightInDeg_NoLIS.pdf","id":"1Zlhp5GMSySnuL_PBq1OHEBcMlhJnWzXW"},"jbay|5|1995|90|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_WeightOutDeg_NoLIS.pdf","id":"1Nog5-r4li8AEF81yI0SpgpHv3cdmgsrY"},"jbay|5|1995|95|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_NoLIS.pdf","id":"1IOcRtp229bzPvJApIZqnQKdrLOb2kQpZ"},"jbay|5|1995|95|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_EigCent_NoLIS.pdf","id":"1oOAeW3gnr6j9iICO3ECYo-eWYZ_nQeH8"},"jbay|5|1995|95|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_WeightInDeg_NoLIS.pdf","id":"1R2QKI-OBpNGKm0u5YBXrkRiBRzhWDlvp"},"jbay|5|1995|95|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_WeightOutDeg_NoLIS.pdf","id":"1e6WxrYMgD951J0q4zi_aBMYrBPTh-wPS"},"wlis|30|1993|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_Alpha Centrality_NoLIS.pdf","id":"1VvtG700qvWfnYdsYxtl_LHXXIWrwellg"},"wlis|30|1993|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_NoLIS.pdf","id":"1mDTiqeQpflowbrinawsUr3Xm5r_iP1NQ"},"wlis|30|1993|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_EigCent_NoLIS.pdf","id":"18HpGxvnDnN2plVdHMFtf55SGxcgrmNda"},"wlis|30|1993|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_Page Rank_NoLIS.pdf","id":"1xUnP-T9YF9RZDyWkT0KKncErGMYaOoJw"},"wlis|30|1993|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightInDeg_NoLIS.pdf","id":"1L2Sqk7x9aIf1Wl_aioKibki_BAoOT0Ac"},"wlis|30|1993|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_25_WeightOutDeg_NoLIS.pdf","id":"1lW26BUgetKGh_3V2CRsIsKwiG1qPAqeY"},"wlis|30|1993|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_Alpha Centrality_NoLIS.pdf","id":"10ZotYCUdiUlRfO3xy5RMbOTgnhEpqvur"},"wlis|30|1993|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_NoLIS.pdf","id":"1kqjYnq-N6oTnXJStD0ZIbIHKuoN01iRT"},"wlis|30|1993|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_EigCent_NoLIS.pdf","id":"1Nx8A205CpGH2cG_wLZcV5_mKBhV3qeNE"},"wlis|30|1993|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_Page Rank_NoLIS.pdf","id":"11jXuk32VIqB4MTMrNOY4StTQy5OP7MFG"},"wlis|30|1993|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightInDeg_NoLIS.pdf","id":"19sH8XMWL-2IYAJBKxKa4MeZGFs83_MD-"},"wlis|30|1993|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_50_WeightOutDeg_NoLIS.pdf","id":"1-weCoLZhG25OuS26ED-WZWPBdQZflN8J"},"wlis|30|1993|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_Alpha Centrality_NoLIS.pdf","id":"14jkKgXY-6Wdngk7HDmVk5gUfxqaxPx6Y"},"wlis|30|1993|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_NoLIS.pdf","id":"1nIu-E4i2aZamHigFW0HUMYi_sVkbog8q"},"wlis|30|1993|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_EigCent_NoLIS.pdf","id":"1MgznZolMAhc77PYYACfBYLQ6o9T6_yhg"},"wlis|30|1993|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_Page Rank_NoLIS.pdf","id":"1rvKp-UTkpLBr5i3bSDwsm7RmrlfdtBQS"},"wlis|30|1993|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightInDeg_NoLIS.pdf","id":"1OJxMcYvAYe5EkX9PcAmjFjLJZHb3_hJv"},"wlis|30|1993|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_75_WeightOutDeg_NoLIS.pdf","id":"1oqN2vTQKP2XJOOhT9QNDjA5Dm6XArmCm"},"wlis|30|1993|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_Alpha Centrality_NoLIS.pdf","id":"1cyeMdvwCXVJHTmzQfCnqe_sbJWspMyzc"},"wlis|30|1993|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_NoLIS.pdf","id":"1EF6iFj0NVr_EclylRAYIQPi4q6ZbJpgq"},"wlis|30|1993|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_EigCent_NoLIS.pdf","id":"1Ad3zds3Na3PLXUHLyHorKjZNpju6j-9e"},"wlis|30|1993|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_Page Rank_NoLIS.pdf","id":"1rDWy49Z-nbgzqmX6fNPl9PoW6ew_dX-L"},"wlis|30|1993|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightInDeg_NoLIS.pdf","id":"1Lhh3YKBgeC_yRisNcE1nP5zY-y-l-TCC"},"wlis|30|1993|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_80_WeightOutDeg_NoLIS.pdf","id":"1aOYNXjy-UpGhb6F4lVYMB4HEVxROmmuL"},"wlis|30|1993|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_Alpha Centrality_NoLIS.pdf","id":"1Q71s046IcBpSntra29f5qPb9XF8vwRZ1"},"wlis|30|1993|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_NoLIS.pdf","id":"1q0L-vTl18BoxLzQybyhi8MzyX1umxbbc"},"wlis|30|1993|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_EigCent_NoLIS.pdf","id":"1brXM_GnysiJZWzkdGi6UFx4FdZ3b1xWx"},"wlis|30|1993|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_Page Rank_NoLIS.pdf","id":"1YfH_Zt8j0jKIFK2W2815MbCnEdV-OPYb"},"wlis|30|1993|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightInDeg_NoLIS.pdf","id":"12A0eb1Elu1PwkE9ZpkvQ7PgYXiTclMz8"},"wlis|30|1993|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_85_WeightOutDeg_NoLIS.pdf","id":"14Mq3XZ3uRKNlsM6eVZbdO-Rv1YUjXAmx"},"wlis|30|1993|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_Alpha Centrality_NoLIS.pdf","id":"1uxS8NknMnze1eRl74PotFn7zl5FL53p_"},"wlis|30|1993|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_NoLIS.pdf","id":"1di1JnzOpO8ysxLQPwK788uZNUk-lqI__"},"wlis|30|1993|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_EigCent_NoLIS.pdf","id":"1gxWOxVhXr1FJDNO4AP0DF4naXgbIKoVL"},"wlis|30|1993|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_Page Rank_NoLIS.pdf","id":"1qEJjAEgN2IJc5QxFW1qUmorjTGw0NyqM"},"wlis|30|1993|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightInDeg_NoLIS.pdf","id":"1_y4xzhkgYz9G_OTkFwJRIT2g4TmogAkn"},"wlis|30|1993|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_90_WeightOutDeg_NoLIS.pdf","id":"1p7H8eb-rLZ00VYwFchgJMFF_Run6fVol"},"wlis|30|1993|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_Alpha Centrality_NoLIS.pdf","id":"1GDhzkC4E1nRAftbB_DfLZ-ZVwLIMvnDh"},"wlis|30|1993|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_NoLIS.pdf","id":"1W6NJQFIPwxdkzeiKc_lKKh8ZNwNhi0Mz"},"wlis|30|1993|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_EigCent_NoLIS.pdf","id":"19zqP9L6O2iW4C3ELIjBEjViU37ui7YpC"},"wlis|30|1993|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_Page Rank_NoLIS.pdf","id":"1LvlE7I1rfEpO0fpge2BTKT6plvyB7OYO"},"wlis|30|1993|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightInDeg_NoLIS.pdf","id":"1kQcFr2YMyfvM-AJzGCRT2tUKuBv9AmxN"},"wlis|30|1993|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1993_95_WeightOutDeg_NoLIS.pdf","id":"1QguhE5LKCD9RWjkubrfPVfpT3__P1q4h"},"wlis|30|1995|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_Alpha Centrality_NoLIS.pdf","id":"1SefBXsIV02IPrxmnX30FmgA3YnLXMGjL"},"wlis|30|1995|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_NoLIS.pdf","id":"1Q6uHv52rAm0ZLflGoFhp1zDJ987FfKbo"},"wlis|30|1995|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_EigCent_NoLIS.pdf","id":"1wQgm1ew8UYDN08GOMVOMbcBiPsk0FW4g"},"wlis|30|1995|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_Page Rank_NoLIS.pdf","id":"11v42SiJadO9IkWjZNWyuO9bmqexta_NG"},"wlis|30|1995|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightInDeg_NoLIS.pdf","id":"1btwPcA1DplP5tY209A8gbh0gCz_z84Lf"},"wlis|30|1995|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_25_WeightOutDeg_NoLIS.pdf","id":"1B9oAV5gSV_umNEmN7nYvzf48Wk2QiDg5"},"wlis|30|1995|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_Alpha Centrality_NoLIS.pdf","id":"1UfVMMcJrl5shQ64gBX5zcAWJF0ghMF1f"},"wlis|30|1995|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_NoLIS.pdf","id":"1KqIZMcWGgvMWcmieQwTSl7P0gJgPdY7g"},"wlis|30|1995|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_EigCent_NoLIS.pdf","id":"1j-r51qhNcIQ1JO1B-3XbbinPkM4nf6K3"},"wlis|30|1995|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_Page Rank_NoLIS.pdf","id":"1fNfMWRIyypNqE2XQqkW-PBrLoftUQ1Zj"},"wlis|30|1995|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightInDeg_NoLIS.pdf","id":"1OtMiWbvRCFPBL72Pe41RNr5l8SfI6lQH"},"wlis|30|1995|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_50_WeightOutDeg_NoLIS.pdf","id":"1721GCJCMubNNG4tMZXrxRQ-KCLCNjhlS"},"wlis|30|1995|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_Alpha Centrality_NoLIS.pdf","id":"13rPTZ-I23xtExmXqJLIp_bgcR5Yrfys7"},"wlis|30|1995|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_NoLIS.pdf","id":"1tBHCBeES4-u2qZVvvR01K2Yj5M2A-dBA"},"wlis|30|1995|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_EigCent_NoLIS.pdf","id":"1Tv-eZShi0iYTmA0ZtZg6_pFMvftMrcFE"},"wlis|30|1995|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_Page Rank_NoLIS.pdf","id":"1TrO0dc0LqSt4HNpkiD52d01PpLY4OmPo"},"wlis|30|1995|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightInDeg_NoLIS.pdf","id":"11JXIs5Eom-blX2DEETjBc9a03PdiIFku"},"wlis|30|1995|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_75_WeightOutDeg_NoLIS.pdf","id":"1NzkgeA__-8fQtlQY4K1S3UYD_0KkrEdH"},"wlis|30|1995|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_Alpha Centrality_NoLIS.pdf","id":"1ey7ioGwZtt6xQi46sG1SHE87Uh6DqRQd"},"wlis|30|1995|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_NoLIS.pdf","id":"1fLoBauL8RwfMGPjPwlS3UlEpJbEbtTYc"},"wlis|30|1995|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_EigCent_NoLIS.pdf","id":"1JKhW-11XYr3-h3XiCLJ4h2_tcz_TUVzC"},"wlis|30|1995|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_Page Rank_NoLIS.pdf","id":"1FUZB-1H63oERWQSbsn47lNCMNq1QpgPS"},"wlis|30|1995|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightInDeg_NoLIS.pdf","id":"1x4-txh9yEifjuKmLmIqM1O9ZWa21Auqr"},"wlis|30|1995|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_80_WeightOutDeg_NoLIS.pdf","id":"1d1QSkx9hC3oxdLYg0Eq5ieU5oG-MK49o"},"wlis|30|1995|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_Alpha Centrality_NoLIS.pdf","id":"1tkszG6E7fu1nbWMvVOtsH0urOaBHDM73"},"wlis|30|1995|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_NoLIS.pdf","id":"1NebWpGcxpWGXu9FddjEuxVwVx6vh73kV"},"wlis|30|1995|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_EigCent_NoLIS.pdf","id":"1ZGdZ74vRew0JYJwpgqYaK0tyn1oyzSmL"},"wlis|30|1995|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_Page Rank_NoLIS.pdf","id":"1AMCZLRwRbGUb_NvDTFs0CU-ukedyesT9"},"wlis|30|1995|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightInDeg_NoLIS.pdf","id":"1QEmmz9DWLnv0uhjw7n5lWX2LjIFyaBOo"},"wlis|30|1995|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_85_WeightOutDeg_NoLIS.pdf","id":"11Rc6opJNIwiyPAniHoKzYlVY3X_CwKQC"},"wlis|30|1995|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_Alpha Centrality_NoLIS.pdf","id":"1od3bdwGg13FkLCbkyzFI6VV_XA_K07-E"},"wlis|30|1995|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_NoLIS.pdf","id":"1utVKJNUS9KL1p5JfIeve12mxd8VzwqWE"},"wlis|30|1995|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_EigCent_NoLIS.pdf","id":"1xND06OHLjzkTIlJb4cl8q6laJFDRVCt8"},"wlis|30|1995|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_Page Rank_NoLIS.pdf","id":"1wbcPDoMIHDm7oqFpmThNRsonaDVFZ6H1"},"wlis|30|1995|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightInDeg_NoLIS.pdf","id":"1-1tbNaJojO3arqt46hsx9_QzL7CItB_S"},"wlis|30|1995|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_90_WeightOutDeg_NoLIS.pdf","id":"15nHIuNDJ-jUfgIA1Dv7QuNqfgovrC_AF"},"wlis|30|1995|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_Alpha Centrality_NoLIS.pdf","id":"1zsGfl4aqOb10VRuCrZZStndPhUNXn72s"},"wlis|30|1995|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_NoLIS.pdf","id":"1LPDPueq7DZlI58P4gb39Hu17hQfY67oK"},"wlis|30|1995|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_EigCent_NoLIS.pdf","id":"106qutkBfika5g9HWyZiK80S-qGZJn-DC"},"wlis|30|1995|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_Page Rank_NoLIS.pdf","id":"1xf-50ySIxcSLQ0Eh9plQsuJ4zSgWEe21"},"wlis|30|1995|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightInDeg_NoLIS.pdf","id":"1LNMZ5_xTb5JQv4Z_4N2LNYnDokvKTJhe"},"wlis|30|1995|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1995_95_WeightOutDeg_NoLIS.pdf","id":"1Rs5GMlIzEzieFUxRGh0u5FP8qu2UxM3F"},"wlis|30|1996|25|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_Alpha Centrality_NoLIS.pdf","id":"1VWPa-kv9BxGjbveSz2cpew1w_QVPVpTE"},"wlis|30|1996|25|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_NoLIS.pdf","id":"1s2fArkajxm1t5FdYoAaHnd0mjz97a1L3"},"wlis|30|1996|25|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_EigCent_NoLIS.pdf","id":"1cdeQ997dBJsmJmlwWqYdNDEJzGmmt3ua"},"wlis|30|1996|25|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_Page Rank_NoLIS.pdf","id":"1mxmSxNRYbZPOoxAORFKa9qz7IWgYUlPZ"},"wlis|30|1996|25|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_WeightInDeg_NoLIS.pdf","id":"1OadpEgC4WQv1yemTyo9SsQErzOrVk1vz"},"wlis|30|1996|25|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_25_WeightOutDeg_NoLIS.pdf","id":"1p1u6457k4e0R026SEpgPL03KHR2zIcIR"},"wlis|30|1996|50|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_Alpha Centrality_NoLIS.pdf","id":"11LjddME_VLmOLUUHlrnSBGV64ta8iiPa"},"wlis|30|1996|50|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_NoLIS.pdf","id":"1Gv17lpTzuLFjQPZgwrjr7Uy8LZSO-t6R"},"wlis|30|1996|50|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_EigCent_NoLIS.pdf","id":"1czC1obfK2ESaHSsqamYAlLt0AB2BEBmY"},"wlis|30|1996|50|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_Page Rank_NoLIS.pdf","id":"1ZX6fOLWIgd4iCJxKbx2S8rH3OZh2zxSj"},"wlis|30|1996|50|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_WeightInDeg_NoLIS.pdf","id":"13y8gEpB37j0lAD2FteObLkRBpOgLtvhv"},"wlis|30|1996|50|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_50_WeightOutDeg_NoLIS.pdf","id":"1Fn4aMtYF5OJlJIKclb8eVHSJq9bgdQCZ"},"wlis|30|1996|75|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_Alpha Centrality_NoLIS.pdf","id":"1_sUXkwL1QLmDXDBJykC-ZKTgjW4W90rk"},"wlis|30|1996|75|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_NoLIS.pdf","id":"1Hsm9K9OCRM0uolbTIm40EaFTp4UmJujU"},"wlis|30|1996|75|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_EigCent_NoLIS.pdf","id":"1Fz-sU-wpw-ISmstPANfcJnsF_Uv8FNGp"},"wlis|30|1996|75|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_Page Rank_NoLIS.pdf","id":"1FlEXeKXJylm-8ORD2let9NXTeowOlm6T"},"wlis|30|1996|75|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_WeightInDeg_NoLIS.pdf","id":"1wuqm597gq9nNrWUvf4PeXUD5EdmTiGsc"},"wlis|30|1996|75|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_75_WeightOutDeg_NoLIS.pdf","id":"1eaQuKDVi8ug4Yk0Ve6PRf81UoVt-VRt7"},"wlis|30|1996|80|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_Alpha Centrality_NoLIS.pdf","id":"1KiQwpJpVnX5CgTpaUY2-FsTXxaen-dQL"},"wlis|30|1996|80|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_NoLIS.pdf","id":"1q4TO0CXtcwymd2vfTgcPXRKwLXJCWK_x"},"wlis|30|1996|80|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_EigCent_NoLIS.pdf","id":"1M8Zu91ejZXRmx59ZziGHhjs2zfwnIYul"},"wlis|30|1996|80|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_Page Rank_NoLIS.pdf","id":"1ZvlZAngvO5oS5HTKfZDTK0tdstglEeuZ"},"wlis|30|1996|80|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_WeightInDeg_NoLIS.pdf","id":"1g1xZ7IQQ0P1Mt5mPrMfSLYHmUyDhhQqW"},"wlis|30|1996|80|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_80_WeightOutDeg_NoLIS.pdf","id":"1WgKELYEBszzgUCb9CZa9qBhZCq45HvhW"},"wlis|30|1996|85|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_Alpha Centrality_NoLIS.pdf","id":"17_SWFabIaEXWE79xTChrQn4b48HbS2vT"},"wlis|30|1996|85|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_NoLIS.pdf","id":"1JI_Gkr3lz6GBl0P_1tt2d7wv6vFfhN6D"},"wlis|30|1996|85|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_EigCent_NoLIS.pdf","id":"1Mgq2uWeAi1AQP1-ouVh_7-HojLiZLikk"},"wlis|30|1996|85|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_Page Rank_NoLIS.pdf","id":"1lzFh03ZYWktKK4tmBC2i2SAboZWjIAzH"},"wlis|30|1996|85|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_WeightInDeg_NoLIS.pdf","id":"14hdt_YrC07JftWp0_VH-CxGNSNYWPiUE"},"wlis|30|1996|85|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_85_WeightOutDeg_NoLIS.pdf","id":"1CGEk242n7bK5e3vD69gOVfiQHzm0J1qA"},"wlis|30|1996|90|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_Alpha Centrality_NoLIS.pdf","id":"1AThBQXEW-uogAlJgFQt8w0GjhwI0IhJY"},"wlis|30|1996|90|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_NoLIS.pdf","id":"1i4fwqVbz_AGUZntSfzrbBuTSG7gWnln5"},"wlis|30|1996|90|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_EigCent_NoLIS.pdf","id":"1N-EhltE8psTpSfFOgfCGiEvjnA90Nk0e"},"wlis|30|1996|90|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_Page Rank_NoLIS.pdf","id":"1B2LEoWsW1qhyHPohevmxySyfId5n3IWZ"},"wlis|30|1996|90|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_WeightInDeg_NoLIS.pdf","id":"1SnT90FLv6t-3R4TY7RTcXvQ8a2UkulHH"},"wlis|30|1996|90|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_90_WeightOutDeg_NoLIS.pdf","id":"1Bp6QjhDCkIZoiEwDWU039L7bSdRLq-ZX"},"wlis|30|1996|95|alpha":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_Alpha Centrality_NoLIS.pdf","id":"1PHVLXkk6ofeLd0gs1HcBvjb-VM-wX05O"},"wlis|30|1996|95|conn":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_NoLIS.pdf","id":"1tWe4inb_Cv3pttL2FOZUEGZsz0rvLua9"},"wlis|30|1996|95|eig":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_EigCent_NoLIS.pdf","id":"1RSdAMJJg-GTJNyU40YwTU5Z1-DF2G2Yv"},"wlis|30|1996|95|pagerank":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_Page Rank_NoLIS.pdf","id":"1FiIWPziFFNv6eIYdJ-ynQVCIM6mFqaJ5"},"wlis|30|1996|95|wid":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_WeightInDeg_NoLIS.pdf","id":"1d0KnbaoUHHnC9Kmg8i9t9b_Cn-WRqh3j"},"wlis|30|1996|95|wod":{"filename":"Grayscale_Connectivity_30runs_BOPPolys_1996_95_WeightOutDeg_NoLIS.pdf","id":"1nSuHpSWfTIWYMU6tcsfH-TbFB2w1wnQY"},"wlis|5|1993|25|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_NoLIS.pdf","id":"12jUGDOxsMZX9djIKIV52gyNaPLJTlOU7"},"wlis|5|1993|25|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_EigCent_NoLIS.pdf","id":"1cxhc9LY_yJszrgl3lk33e8jzowFiJrXa"},"wlis|5|1993|25|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_WeightInDeg_NoLIS.pdf","id":"1nfA5wjeX6cpFb3yWi0BPKPN6qtqAbvgR"},"wlis|5|1993|25|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_25_WeightOutDeg_NoLIS.pdf","id":"1oD0bAXJrFNSMQjvJP_sMoHzdfo1ke73U"},"wlis|5|1993|50|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_NoLIS.pdf","id":"1dJ29OjPzkpttXPTJ_0GgPMdKfn-JzGhL"},"wlis|5|1993|50|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_EigCent_NoLIS.pdf","id":"1byOKawVeWRX1hsgT7URv8brENRCCxEV5"},"wlis|5|1993|50|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_WeightInDeg_NoLIS.pdf","id":"1OSgJ64iU-tp-d7wGi9Dm_556yPZS4kdA"},"wlis|5|1993|50|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_50_WeightOutDeg_NoLIS.pdf","id":"1vmEToOhb5yXiuz0ZXvLRVTbIwr97dndy"},"wlis|5|1993|75|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_NoLIS.pdf","id":"1M3gCWHQd4MdUTPVorTMObSAt8JATAd8e"},"wlis|5|1993|75|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_EigCent_NoLIS.pdf","id":"1U99SbO9d4phGs7O0uNcgNgSQAbRRqSAg"},"wlis|5|1993|75|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_WeightInDeg_NoLIS.pdf","id":"10xBaHW9llJF_ynbfwJARb321squQTQTB"},"wlis|5|1993|75|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_75_WeightOutDeg_NoLIS.pdf","id":"1Sff-1zNb6ZmglVEvBAowI4JS_Xh-LDcb"},"wlis|5|1993|80|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_NoLIS.pdf","id":"1PXurWYcDK_-IVuBUn0h7LS7J3MjHKDmo"},"wlis|5|1993|80|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_EigCent_NoLIS.pdf","id":"1zAj3QTcIyGFbTAbIrKEglFskWEiUEahE"},"wlis|5|1993|80|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_WeightInDeg_NoLIS.pdf","id":"1YhxLetKAg62-pA6-kqi2JmK45Fp88B7z"},"wlis|5|1993|80|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_80_WeightOutDeg_NoLIS.pdf","id":"1m4ej1gVxBaJuRePZ9bE8qdj2Obs1fMLI"},"wlis|5|1993|85|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_NoLIS.pdf","id":"1Qne2MY5iRS8tHW6AJSBxj6xo80VDUWnG"},"wlis|5|1993|85|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_EigCent_NoLIS.pdf","id":"1MdDAkYP6dpmrRaSYKj9gINMa50F7nd2l"},"wlis|5|1993|85|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_WeightInDeg_NoLIS.pdf","id":"1UN45Uy_Y_F7LoACI6OeUm9yoRg5oYGQ_"},"wlis|5|1993|85|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_85_WeightOutDeg_NoLIS.pdf","id":"1Y0rR3_q85Zqt8sQJ6HOKRk8Bu9knmks1"},"wlis|5|1993|90|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_NoLIS.pdf","id":"1EWN6W6xzFFvTTEvxDdqrZizq2Esdxf3M"},"wlis|5|1993|90|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_EigCent_NoLIS.pdf","id":"14JAyS31zDRVGJpD8oiQM9T_0gq5heucq"},"wlis|5|1993|90|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_WeightInDeg_NoLIS.pdf","id":"1Hg1ACUOE0CDrDfCjMthetDiPXT_VojHc"},"wlis|5|1993|90|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_90_WeightOutDeg_NoLIS.pdf","id":"1ezdYnu-Tv84lW72P7JLD6hbkM_Jcu0db"},"wlis|5|1993|95|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_NoLIS.pdf","id":"1Lrz-gsJj2j_Cd3D_b3xcE6fxBRblVZBt"},"wlis|5|1993|95|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_EigCent_NoLIS.pdf","id":"1xC1cdE_LVb9foD74h5VfpTNxxFa22eHe"},"wlis|5|1993|95|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_WeightInDeg_NoLIS.pdf","id":"1AyVDI2MrirkFBiGCXoDOq2P6DBWm7_fM"},"wlis|5|1993|95|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1993_95_WeightOutDeg_NoLIS.pdf","id":"15TR5r926B6U8WVI-jY72qFRleAIQTE_M"},"wlis|5|1995|25|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_NoLIS.pdf","id":"1mTq3_Cfgqbzkg69Qj1TPpc5ZZ7f8UVXk"},"wlis|5|1995|25|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_EigCent_NoLIS.pdf","id":"1qoQFB3xfULI7hqaTVZ35RQuBsyn8VKwq"},"wlis|5|1995|25|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_WeightInDeg_NoLIS.pdf","id":"1IM5twlfb_-QK0IopnBzNEbu2pMMI8byJ"},"wlis|5|1995|25|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_25_WeightOutDeg_NoLIS.pdf","id":"1atTWCTiF6iGG1AidFlDb-3k4_D6lp5b8"},"wlis|5|1995|50|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_NoLIS.pdf","id":"1qFXj5ZXvDl3zAjMQeweXIeaVrfPmY7j1"},"wlis|5|1995|50|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_EigCent_NoLIS.pdf","id":"1sSUjAK71u8z5P7Qa49LHAnZdSdePcFEZ"},"wlis|5|1995|50|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_WeightInDeg_NoLIS.pdf","id":"19jh6cYb6YZDkyJ0M9SKgY0TZeNG4__44"},"wlis|5|1995|50|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_50_WeightOutDeg_NoLIS.pdf","id":"1tjshjCiC3ol2zHcohhnFY2vFInruTqI0"},"wlis|5|1995|75|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_NoLIS.pdf","id":"1hKu8dBs2Bn0S2vulcIhYhQtNyJRBpQdP"},"wlis|5|1995|75|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_EigCent_NoLIS.pdf","id":"1jLqav2M0DIqUXLZlbAxGAGW7PbfSEW4R"},"wlis|5|1995|75|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_WeightInDeg_NoLIS.pdf","id":"138r9ZET1rrZR7M6cVtwjK9j_D0opB-gw"},"wlis|5|1995|75|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_75_WeightOutDeg_NoLIS.pdf","id":"1XOtYrJ8OrBMV-_a2M1IgpVsxTdgRJ0-w"},"wlis|5|1995|80|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_NoLIS.pdf","id":"1GGh20J1VfWkYImMNj7ngNsBYraU7xIvs"},"wlis|5|1995|80|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_EigCent_NoLIS.pdf","id":"1wUu4wER6Qqyzx5a_qFM6rxNP93V9iYSx"},"wlis|5|1995|80|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_WeightInDeg_NoLIS.pdf","id":"1E9HxqKv0YkQv4afRysEuKPWweLUO2WI5"},"wlis|5|1995|80|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_80_WeightOutDeg_NoLIS.pdf","id":"1eSP_gsuHQ2g6QnG35HmKwOCRCDKmG8Oq"},"wlis|5|1995|85|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_NoLIS.pdf","id":"1bibeJ3K4Rh_Y_9pGEFnrC5hQaGyZh695"},"wlis|5|1995|85|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_EigCent_NoLIS.pdf","id":"1shsRpSK85znDU2BJAFoUoY38_Ppz-gsF"},"wlis|5|1995|85|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_WeightInDeg_NoLIS.pdf","id":"1i2xMbcGa9ax_Q4iCHxsLZYcYq89qM22T"},"wlis|5|1995|85|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_85_WeightOutDeg_NoLIS.pdf","id":"17a_O0CvL_5oX6ETrFdAyuin1xcVpxTeQ"},"wlis|5|1995|90|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_NoLIS.pdf","id":"1_GHAM8pTXuCCzlK2_1QWYpOGJgFr_VGi"},"wlis|5|1995|90|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_EigCent_NoLIS.pdf","id":"1gZp7QZ7TquN3VpCcbWKX0vL6mQjfd3e_"},"wlis|5|1995|90|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_WeightInDeg_NoLIS.pdf","id":"1zSNrP2E7cW5wdcVMQEuVQmcXgPYkpCKS"},"wlis|5|1995|90|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_90_WeightOutDeg_NoLIS.pdf","id":"1phfIh7t0QhKcqjUU0m__esgk5rrmAJCW"},"wlis|5|1995|95|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_NoLIS.pdf","id":"1M-ENy7p7skZHltR2V37JXipj-LsQG2Kg"},"wlis|5|1995|95|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_EigCent_NoLIS.pdf","id":"1lRErkrABiSkZyM65ysBe8WKJ45uj1hYr"},"wlis|5|1995|95|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_WeightInDeg_NoLIS.pdf","id":"1rOwy2WEjJQ6ycLmgf9hJJC39pClenIBs"},"wlis|5|1995|95|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1995_95_WeightOutDeg_NoLIS.pdf","id":"1nLMRcf90tp14UXrKqgBUdaSTq5SCjOYE"},"wlis|5|1996|25|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_25_NoLIS.pdf","id":"1nF9JP6lCbEzxxWvbdUWCMNqBhnH9YuQ4"},"wlis|5|1996|25|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_25_EigCent_NoLIS.pdf","id":"1kYKUGn-GXgUJaDL0DW90a3VhiAiuuouC"},"wlis|5|1996|25|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_25_WeightInDeg_NoLIS.pdf","id":"1toWWkEqN5ZYbt6JehZNuB7sMGdBI4hBq"},"wlis|5|1996|25|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_25_WeightOutDeg_NoLIS.pdf","id":"1IUEQa0orZmWgz8PPmClchCLwY_uXPH2x"},"wlis|5|1996|50|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_50_NoLIS.pdf","id":"1ia-3cLQ9GUx1UPjZQ-UgzDYNi5cEtmXu"},"wlis|5|1996|50|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_50_EigCent_NoLIS.pdf","id":"1EDGLy-aCqrG5ZsBw6aVxZXqLqXKSpG-Y"},"wlis|5|1996|50|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_50_WeightInDeg_NoLIS.pdf","id":"1waSKrUyeuo3EoiYUJ5x6tSxIIjavZWkd"},"wlis|5|1996|50|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_50_WeightOutDeg_NoLIS.pdf","id":"1ZagGFExBtKQRwJS_gUliWqn11MeKpTb-"},"wlis|5|1996|75|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_75_NoLIS.pdf","id":"1GnORUG8iOapKLpo8DWc3fgW3nGH6UV6f"},"wlis|5|1996|75|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_75_EigCent_NoLIS.pdf","id":"1CxpzzQAl9srP-A4WnyN_-TRYcpG6XQtw"},"wlis|5|1996|75|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_75_WeightInDeg_NoLIS.pdf","id":"1kd87xvClmPdPmE0ngIp464e5iHi6zB4g"},"wlis|5|1996|75|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_75_WeightOutDeg_NoLIS.pdf","id":"184lgj-jhFg_lg_cS5AY3pdJ7Ky_efoAA"},"wlis|5|1996|80|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_80_NoLIS.pdf","id":"1NuYDyEw7MkOOCKMMO9sUzD-tpkjI2Ho6"},"wlis|5|1996|80|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_80_EigCent_NoLIS.pdf","id":"1OdCINes4d9ot491Dqq-USRcwGmFLeIlt"},"wlis|5|1996|80|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_80_WeightInDeg_NoLIS.pdf","id":"1XLNpsJoiXy4C2ZHHEhLHFKd56a-81IY5"},"wlis|5|1996|80|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_80_WeightOutDeg_NoLIS.pdf","id":"1tQPxlWpUnzTQkjN7I4dNVfdFPW42b3s4"},"wlis|5|1996|85|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_85_NoLIS.pdf","id":"1533ZAvfGADg6h4o0z2GA2pA6Apnbfjl5"},"wlis|5|1996|85|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_85_EigCent_NoLIS.pdf","id":"1KgXVV8iyBAAG-UG-HDs-ICKgGQE_428N"},"wlis|5|1996|85|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_85_WeightInDeg_NoLIS.pdf","id":"1BB4o-RRxWtbzYmS4gf6l6GA5glQB-uU5"},"wlis|5|1996|85|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_85_WeightOutDeg_NoLIS.pdf","id":"1oqvl9tU8KccisskMgXsXZg4OV8C8OQyW"},"wlis|5|1996|90|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_90_NoLIS.pdf","id":"1rYoEw-P3ANS2bEYF3t5OC-Fds8HClY5h"},"wlis|5|1996|90|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_90_EigCent_NoLIS.pdf","id":"1ScMzQ4kfisQMf36OEP5Mq_qrQWPRPcUy"},"wlis|5|1996|90|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_90_WeightInDeg_NoLIS.pdf","id":"1Z-fD3qegoJBPh5nKmnS6-sDL_VzCL5Fc"},"wlis|5|1996|90|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_90_WeightOutDeg_NoLIS.pdf","id":"163fgYDwahP6k2yBZCH0VSiq4q771gEhi"},"wlis|5|1996|95|conn":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_95_NoLIS.pdf","id":"11Bm_gIfbqcWoEMd8ylWOIllJQryigATo"},"wlis|5|1996|95|eig":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_95_EigCent_NoLIS.pdf","id":"1idB7Yu9_s-bgUpyifUKWKsF7Vk5yvFve"},"wlis|5|1996|95|wid":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_95_WeightInDeg_NoLIS.pdf","id":"1RfZc0jAnnwFUGWqH78mCRARErTXJtUM-"},"wlis|5|1996|95|wod":{"filename":"Grayscale_Connectivity_5runs_BOPPolys_1996_95_WeightOutDeg_NoLIS.pdf","id":"1oT-BvHoIoR0OhaCwkkfQpOIhtRdmXvZP"}};
 
-const YEARS = [[1993,'moderate'],[1995,'low'],[1996,'high']];
-const RUNS = [5,30];
-const PCTS = [25,50,75,80,85,90,95];
-const PARAMS = [['conn','Connectivity strength'],['eig','Eigenvalue centrality'],['wid','Weighted in-degree']];
-const PARAM_TOK = {conn:'',eig:'EigCent',wid:'WeightInDeg'};
+const SCOPE_ORDER=["harbor","jbay","wlis"];
+const METRIC_ORDER=["conn","eig","wid","wod","alpha","pagerank"];
+const SCOPE_LABEL={harbor:"Harbor-wide",jbay:"Jamaica Bay",wlis:"Western Long Island Sound"};
+const METRIC_LABEL={conn:"Connectivity strength",eig:"Eigenvalue centrality",wid:"Weighted in-degree",
+  wod:"Weighted out-degree",alpha:"Alpha centrality",pagerank:"PageRank"};
+const YEAR_LABEL={"1993":"1993 \u2014 moderate flow","1995":"1995 \u2014 low flow","1996":"1996 \u2014 high flow"};
 
-// Default states — same except LIS, so the first view is an immediate A/B contrast
-const STATE = {
-  A:{runs:30,year:1993,pct:75,param:'conn',lis:'with'},
-  B:{runs:30,year:1993,pct:75,param:'conn',lis:'no'}
+// ---- derive available dimensions from the manifest ----
+const keys=Object.keys(MANIFEST);
+const parts=k=>k.split("|"); // scope|runs|year|pct|metric
+function uniqSorted(arr,cmp){return [...new Set(arr)].sort(cmp)}
+const numCmp=(a,b)=>(+a)-(+b);
+
+const SCOPES=SCOPE_ORDER.filter(s=>keys.some(k=>parts(k)[0]===s));
+function runsFor(s){return uniqSorted(keys.filter(k=>parts(k)[0]===s).map(k=>parts(k)[1]),numCmp)}
+function yearsFor(s){return uniqSorted(keys.filter(k=>parts(k)[0]===s).map(k=>parts(k)[2]),numCmp)}
+function pctsFor(s){return uniqSorted(keys.filter(k=>parts(k)[0]===s).map(k=>parts(k)[3]),numCmp)}
+function metricsFor(s,r){const set=new Set(keys.filter(k=>parts(k)[0]===s&&parts(k)[1]===r).map(k=>parts(k)[4]));
+  return METRIC_ORDER.filter(m=>set.has(m))}
+
+const state={
+  A:{scope:"harbor",runs:"30",year:"1993",pct:"75",metric:"conn"},
+  B:{scope:"wlis",runs:"30",year:"1993",pct:"75",metric:"eig"}
 };
 
-function keyOf(s){return `${s.runs}|${s.year}|${s.pct}|${s.param}|${s.lis}`;}
-function filenameOf(s){
-  const p = PARAM_TOK[s.param] ? '_'+PARAM_TOK[s.param] : '';
-  const l = s.lis==='no' ? '_NoLIS' : '';
-  return `Grayscale_Connectivity_${s.runs}runs_BOPPolys_${s.year}_${s.pct}${p}${l}.pdf`;
-}
-// Readout with the user-controlled tokens highlighted
-function readoutHTML(s){
-  const p = PARAM_TOK[s.param] ? '_<span class="t-var">'+PARAM_TOK[s.param]+'</span>' : '';
-  const l = s.lis==='no' ? '_<span class="t-var">NoLIS</span>' : '';
-  return `Grayscale_Connectivity_<span class="t-var">${s.runs}</span>runs_BOPPolys_`+
-         `<span class="t-var">${s.year}</span>_<span class="t-var">${s.pct}</span>${p}${l}.pdf`;
+function opt(v,label,sel){const o=document.createElement("option");o.value=v;o.textContent=label;if(v===sel)o.selected=true;return o}
+
+function reconcile(st){
+  // ensure the state is valid for its scope; fall back sensibly where not
+  if(!SCOPES.includes(st.scope))st.scope=SCOPES[0];
+  const rs=runsFor(st.scope); st.runs=rs.includes("30")?"30":rs[0];
+  const years=yearsFor(st.scope); if(!years.includes(st.year))st.year=years[0];
+  const pcts=pctsFor(st.scope); if(!pcts.includes(st.pct))st.pct=pcts.includes("75")?"75":pcts[0];
+  const mets=metricsFor(st.scope,st.runs); if(!mets.includes(st.metric))st.metric=mets.includes("conn")?"conn":mets[0];
 }
 
-function panelTemplate(id){
-  const s = STATE[id];
-  const other = id==='A'?'B':'A';
-  return `
-  <div class="panel" data-panel="${id}">
-    <div class="panel-head">
-      <span class="panel-tag"><span class="dot"></span>Panel ${id}</span>
-      <button class="match-btn" data-match="${id}">Match panel ${other}</button>
-    </div>
-    <div class="controls">
-      <div class="field">
-        <label class="lab" for="${id}-year">Flow year</label>
-        <select id="${id}-year" data-k="year">
-          ${YEARS.map(([y])=>`<option value="${y}" ${y===s.year?'selected':''}>${y}</option>`).join('')}
-        </select>
-        <span class="flowchip" id="${id}-flow"></span>
-      </div>
-      <div class="field">
-        <label class="lab" for="${id}-runs">Releases / runs</label>
-        <select id="${id}-runs" data-k="runs">
-          ${RUNS.map(r=>`<option value="${r}" ${r===s.runs?'selected':''}>${r} runs</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label class="lab" for="${id}-pct">Connectivity threshold</label>
-        <select id="${id}-pct" data-k="pct">
-          ${PCTS.map(p=>`<option value="${p}" ${p===s.pct?'selected':''}>${p}th percentile</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label class="lab" for="${id}-param">Output metric</label>
-        <select id="${id}-param" data-k="param">
-          ${PARAMS.map(([v,l])=>`<option value="${v}" ${v===s.param?'selected':''}>${l}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field span">
-        <label class="lab">Long Island Sound source populations</label>
-        <div class="seg" role="group" aria-label="LIS sources, panel ${id}">
-          <button data-lis="with" aria-pressed="${s.lis==='with'}">Include LIS</button>
-          <button data-lis="no" aria-pressed="${s.lis==='no'}">Exclude LIS</button>
-        </div>
-      </div>
-    </div>
-    <div class="readout" id="${id}-readout"></div>
-    <div class="preview" id="${id}-preview">
-      <iframe id="${id}-frame" title="Connectivity plot, panel ${id}" loading="lazy" allow="autoplay"></iframe>
-      <div class="na">
-        <div class="na-icon">∅</div>
-        <h3>Not generated</h3>
-        <p>This combination wasn't produced. The 5-run set at 25/50/75 with LIS included doesn't exist for 1995–1996.</p>
-      </div>
-    </div>
-    <div class="panel-foot">
-      <span id="${id}-count"></span>
-      <a class="drive-link" id="${id}-open" href="#" target="_blank" rel="noopener">Open in Drive ↗</a>
-    </div>
-  </div>`;
+function buildControls(panel){
+  const st=state[panel];reconcile(st);
+  const wrap=document.querySelector(`.panel[data-panel="${panel}"] .controls`);
+  const years=yearsFor(st.scope),pcts=pctsFor(st.scope),mets=metricsFor(st.scope,st.runs);
+  wrap.innerHTML="";
+  const mk=(name,label,items,sel,fmt)=>{
+    const c=document.createElement("div");c.className="ctl";
+    const l=document.createElement("label");l.textContent=label;
+    const s=document.createElement("select");s.dataset.k=name;
+    items.forEach(it=>s.appendChild(opt(it,fmt(it),sel)));
+    s.addEventListener("change",()=>{state[panel][name]=s.value;
+      // scope or runs changes can invalidate downstream options -> rebuild this panel's controls
+      if(name==="scope"||name==="runs"){buildControls(panel);} render(panel);});
+    c.appendChild(l);c.appendChild(s);return c;
+  };
+  wrap.appendChild(mk("scope","Region",SCOPES,st.scope,v=>SCOPE_LABEL[v]));
+  wrap.appendChild(mk("year","Flow year",years,st.year,v=>YEAR_LABEL[v]||v));
+  wrap.appendChild(mk("pct","Threshold",pcts,st.pct,v=>v+"%"));
+  wrap.appendChild(mk("metric","Output metric",mets,st.metric,v=>METRIC_LABEL[v]));
 }
 
-const stage = document.getElementById('stage');
-stage.innerHTML = panelTemplate('A') + panelTemplate('B');
+function keyFor(st){return `${st.scope}|${st.runs}|${st.year}|${st.pct}|${st.metric}`}
 
-function render(id){
-  const s = STATE[id];
-  const k = keyOf(s);
-  const fid = MANIFEST[k];
-  document.getElementById(`${id}-readout`).innerHTML = readoutHTML(s);
-  const flow = (YEARS.find(y=>y[0]===s.year)||[])[1]||'';
-  document.getElementById(`${id}-flow`).innerHTML = `<b>${flow}</b> flow`;
-  const prev = document.getElementById(`${id}-preview`);
-  const frame = document.getElementById(`${id}-frame`);
-  const open = document.getElementById(`${id}-open`);
-  if(fid){
-    prev.classList.remove('empty');
-    const src = FILE_EMBED(fid);
-    if(frame.src!==src){ frame.style.opacity=0; frame.src=src; frame.onload=()=>frame.style.opacity=1; }
-    open.href = FILE_VIEW(fid); open.setAttribute('aria-disabled','false');
-  }else{
-    prev.classList.add('empty'); frame.removeAttribute('src');
-    open.href='#'; open.setAttribute('aria-disabled','true');
+function highlight(fn,st){
+  // escape then emphasise the user-controlled tokens within the real filename
+  let s=fn.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  s=s.replace(/Grayscale_Connectivity_/,'<span class="mut">Grayscale_Connectivity_</span>');
+  s=s.replace(/_BOPPolys_/,'<span class="mut">_BOPPolys_</span>');
+  s=s.replace(/(_NoBadPolys|_NoLIS)\.pdf$/,'<span class="mut">$1.pdf</span>');
+  s=s.replace(new RegExp("(\\b"+st.runs+"runs\\b)"),'<em>$1</em>');
+  s=s.replace(new RegExp("_("+st.year+")_"),'_<em>$1</em>_');
+  s=s.replace(new RegExp("_("+st.pct+")_"),'_<em>$1</em>_');
+  return s;
+}
+
+function render(panel){
+  const st=state[panel];reconcile(st);
+  const root=document.querySelector(`.panel[data-panel="${panel}"]`);
+  const viewer=root.querySelector(".viewer");
+  const readout=root.querySelector(".readout");
+  const entry=MANIFEST[keyFor(st)];
+  if(entry){
+    viewer.innerHTML=`<iframe src="https://drive.google.com/file/d/${entry.id}/preview" loading="lazy" allow="autoplay"></iframe>`;
+    readout.innerHTML=
+      `<div class="fname">${highlight(entry.filename,st)}</div>`+
+      `<div class="rline"><span>${SCOPE_LABEL[st.scope]} &middot; ${st.year} &middot; ${st.pct}% &middot; ${METRIC_LABEL[st.metric]}</span>`+
+      `<a href="https://drive.google.com/file/d/${entry.id}/view" target="_blank" rel="noopener">Open in Drive &rarr;</a></div>`;
+  } else {
+    viewer.innerHTML=`<div class="missing"><strong>Not generated</strong>`+
+      `<span>No plot exists for ${SCOPE_LABEL[st.scope]}, ${st.year}, ${st.pct}%, ${METRIC_LABEL[st.metric]}.</span></div>`;
+    readout.innerHTML=`<div class="fname mut">&mdash; selection not produced &mdash;</div>`;
   }
 }
-function refreshCounts(){
-  const total = Object.keys(MANIFEST).length;
-  ['A','B'].forEach(id=>{
-    const el=document.getElementById(`${id}-count`);
-    if(el) el.textContent = `${total} plots available`;
-  });
-}
 
-// Wire controls
-['A','B'].forEach(id=>{
-  const panel = stage.querySelector(`.panel[data-panel="${id}"]`);
-  panel.querySelectorAll('select').forEach(sel=>{
-    sel.addEventListener('change',e=>{
-      const k=e.target.dataset.k;
-      let v=e.target.value; if(k==='runs'||k==='pct'||k==='year') v=parseInt(v,10);
-      STATE[id][k]=v; render(id);
-    });
-  });
-  panel.querySelectorAll('.seg button').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      STATE[id].lis=btn.dataset.lis;
-      panel.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed', b===btn));
-      render(id);
-    });
-  });
-  panel.querySelector('.match-btn').addEventListener('click',()=>{
-    const other = id==='A'?'B':'A';
-    STATE[id] = {...STATE[other]};
-    syncControls(id); render(id);
+function refresh(panel){buildControls(panel);render(panel)}
+
+// match buttons
+document.querySelectorAll("button.match").forEach(b=>{
+  b.addEventListener("click",()=>{
+    const from=b.dataset.from, to=from==="A"?"B":"A";
+    state[to]={...state[from]};
+    refresh(to);
   });
 });
+// layout toggle
+const stage=document.getElementById("stage");
+const bC=document.getElementById("layCompare"),bS=document.getElementById("laySingle");
+bC.addEventListener("click",()=>{stage.className="compare";bC.setAttribute("aria-pressed","true");bS.setAttribute("aria-pressed","false")});
+bS.addEventListener("click",()=>{stage.className="single";bS.setAttribute("aria-pressed","true");bC.setAttribute("aria-pressed","false")});
 
-function syncControls(id){
-  const s=STATE[id];
-  const panel=stage.querySelector(`.panel[data-panel="${id}"]`);
-  panel.querySelector(`#${id}-year`).value=s.year;
-  panel.querySelector(`#${id}-runs`).value=s.runs;
-  panel.querySelector(`#${id}-pct`).value=s.pct;
-  panel.querySelector(`#${id}-param`).value=s.param;
-  panel.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.lis===s.lis));
-}
+// coverage note
+(function(){
+  const n=keys.length;
+  const per=SCOPES.map(s=>`${SCOPE_LABEL[s]} ${keys.filter(k=>parts(k)[0]===s).length}`).join(" &middot; ");
+  document.getElementById("cov").innerHTML=
+    `${n} plots embedded &mdash; ${per}. All plots use the 30-run ensemble. Plots stream directly from Google Drive; they must remain shared as `+
+    `&ldquo;anyone with the link&rdquo; for the viewer to display them. If the PDFs are re-uploaded (new Drive IDs), the manifest needs regenerating.`;
+})();
 
-// Layout mode
-const mCompare=document.getElementById('mode-compare');
-const mSingle=document.getElementById('mode-single');
-function setMode(single){
-  stage.classList.toggle('single',single);
-  mSingle.setAttribute('aria-pressed',single);
-  mCompare.setAttribute('aria-pressed',!single);
-}
-mCompare.addEventListener('click',()=>setMode(false));
-mSingle.addEventListener('click',()=>setMode(true));
-
-render('A'); render('B'); refreshCounts();
+refresh("A");refresh("B");
 </script>
 </body>
 </html>
